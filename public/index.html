@@ -1,11 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process Scheduler Simulator</title>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <header>
+      <h1>Process Scheduler Simulator</h1>
+  </header>
+  <main>
+    <section id="process-input">
+        <h2>Define Processes</h2>
+        <form id="process-form">
+            <div class="form-group">
+                <label for="pid">PID:</label>
+                <input type="number" id="pid" value="1" required>
+            </div>
+            <div class="form-group">
+                <label for="arrivalTime">Arrival Time:</label>
+                <input type="number" id="arrivalTime" value="0" required>
+            </div>
+            <div class="form-group">
+                <label for="burstTime">Burst Time:</label>
+                <input type="number" id="burstTime" value="5" required>
+            </div>
+            <div class="form-group">
+                <label for="priority">Priority (optional):</label>
+                <input type="number" id="priority" value="0">
+            </div>
+            <button type="submit">Add Process</button>
+        </form>
+        <h3>Current Processes:</h3>
+        <ul id="process-list">
+            <!-- Processes will be listed here -->
+        </ul>
+        <button id="clear-processes">Clear All Processes</button>
+    </section>
+
+    <section id="simulation-controls">
+        <h2>Simulation Controls</h2>
+        <label for="algorithm-select">Select Algorithm:</label>
+        <select id="algorithm-select">
+            <option value="FCFS">FCFS (First-Come, First-Served)</option>
+            <!-- Other algorithms will be added here -->
+        </select>
+        <button id="run-simulation">Run Simulation</button>
+    </section>
+
+    <section id="simulation-results">
+        <h2>Simulation Results</h2>
+        <div id="gantt-chart">
+            <!-- Gantt chart will be rendered here -->
+        </div>
+        <div id="statistics">
+            <!-- Statistics will be displayed here -->
+        </div>
+    </section>
+</main>
+  <footer>
+    <p>&copy; 2024 Process Scheduler Simulator</p>
+  </footer>
 </body>
 <script type="module" src="./wasm/module.js"></script>
 <script type="module" src="./js/main.js"></script>
