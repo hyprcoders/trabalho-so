@@ -9,6 +9,13 @@ EMSCRIPTEN_BINDINGS(scheduling) {
         .value("Switching", ExecutionType::Switching)
         .value("Tardy", ExecutionType::Tardy);
     
+    enum_<SchedulingAlgorithm>("SchedulingAlgorithm")
+        .value("FCFS", SchedulingAlgorithm::FCFS)
+        .value("SJF", SchedulingAlgorithm::SJF)
+        .value("SRTF", SchedulingAlgorithm::SRTF)
+        .value("RR", SchedulingAlgorithm::RR)
+        .value("EDF", SchedulingAlgorithm::EDF);
+
     register_vector<Process>("VectorProcess");
     register_vector<ExecutionBlock>("VectorExecutionBlock");
 
