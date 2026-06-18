@@ -9,7 +9,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # This code knows nothing about WebAssembly or JS 
 # ---------------------------------------------------------
 add_library(core_engine STATIC
-    src/core/scheduler.cpp
+    src/core/utils.cpp
+    src/core/schedulers/scheduler.cpp
+    src/core/schedulers/fifo.cpp
+    src/core/main.cpp
 )
 
 # including the include/ directory

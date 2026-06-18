@@ -9,6 +9,7 @@ enum class ExecutionType {
 };
 
 enum class SchedulingAlgorithm {
+    FIFO,
     FCFS,
     SJF,
     SRTF,
@@ -30,9 +31,9 @@ struct ScheduleConfiguration {
     int switchingTime;
     int seed;
     SchedulingAlgorithm schedulingAlgorithm;
-    std::vector<Process> processes;
     std::optional<int> diskCost;
     std::optional<float> temperature;
+    std::vector<Process> processes;
 };
 
 struct ExecutionBlock {

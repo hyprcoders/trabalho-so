@@ -10,6 +10,7 @@ EMSCRIPTEN_BINDINGS(scheduling) {
         .value("Tardy", ExecutionType::Tardy);
     
     enum_<SchedulingAlgorithm>("SchedulingAlgorithm")
+        .value("FIFO", SchedulingAlgorithm::FIFO)
         .value("FCFS", SchedulingAlgorithm::FCFS)
         .value("SJF", SchedulingAlgorithm::SJF)
         .value("SRTF", SchedulingAlgorithm::SRTF)
@@ -32,9 +33,9 @@ EMSCRIPTEN_BINDINGS(scheduling) {
         .field("switchingTime", &ScheduleConfiguration::switchingTime)
         .field("seed", &ScheduleConfiguration::seed)
         .field("schedulingAlgorithm", &ScheduleConfiguration::schedulingAlgorithm)
-        .field("processes", &ScheduleConfiguration::processes)
         .field("diskCost", &ScheduleConfiguration::diskCost)
-        .field("temperature", &ScheduleConfiguration::temperature);
+        .field("temperature", &ScheduleConfiguration::temperature)
+        .field("processes", &ScheduleConfiguration::processes);
 
     value_object<ExecutionBlock>("ExecutionBlock")
         .field("startTime", &ExecutionBlock::startTime)
