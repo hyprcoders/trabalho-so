@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # This code knows nothing about WebAssembly or JS 
 # ---------------------------------------------------------
 add_library(core_engine STATIC
-    src/core/main.cpp
+    src/core/scheduler.cpp
 )
 
 # including the include/ directory
@@ -29,6 +29,7 @@ if (EMSCRIPTEN)
         "--bind"
         "-sWASM=1"
         "-sMODULARIZE=1"
+        "-sEXPORT_ES6=1"
         "-sEXPORT_NAME='createModule'"
         "-sALLOW_MEMORY_GROWTH=1"
     )
