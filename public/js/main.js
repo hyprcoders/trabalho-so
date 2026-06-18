@@ -13,7 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let Module; // To hold the Emscripten module instance
 
     // Initialize the Emscripten module
-    createModule().then(instance => {
+    createModule({
+        locateFile: (path) => {
+            if (path.endsWith('.wasm')) {
+                return `wasm/${path}`;
+            }
+            return path;
+        }
+    }).then(instance => {
         Module = instance;
         console.log('WebAssembly module loaded successfully!');
         // You can now interact with your C++ functions via Module.cwrap or Module.ccall
