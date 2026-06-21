@@ -9,6 +9,9 @@ ExecutionSchedule schedule(const ScheduleConfiguration& config) {
     case SchedulingAlgorithm::FIFO:
         execution = FIFOScheduler(config).execute();
         break;
+    case SchedulingAlgorithm::SJF:
+        execution = SJFScheduler(config).execute();
+        break;
     default:    
         break;
     }
