@@ -1,5 +1,5 @@
 #pragma once
-#include <types.hpp>
+#include "types.hpp"
 
 class AbstractScheduler {
 protected:
@@ -20,5 +20,18 @@ public:
 class FIFOScheduler: public AbstractScheduler {
 public:
     FIFOScheduler(const ScheduleConfiguration &config);
+
+    ExecutionSchedule execute();
+};
+
+class SJFScheduler: public AbstractScheduler {
+public:
+    struct ShortJob {
+        int duration;
+        size_t index;
+        bool operator<(const ShortJob &other) const;
+    };
+    SJFScheduler(const ScheduleConfiguration &config);
+
     ExecutionSchedule execute();
 };
