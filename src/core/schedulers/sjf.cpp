@@ -7,6 +7,7 @@
 
 
 SJFScheduler::SJFScheduler(const ScheduleConfiguration &config): AbstractScheduler(config) { }
+SRTFScheduler::SRTFScheduler(const ScheduleConfiguration &config): AbstractScheduler(config) { }
 
 using SJob = ShortJob;
 
@@ -24,7 +25,7 @@ ExecutionSchedule SJFScheduler::execute() {
     int lastEndTime = 0, nextArrivalTime = 0;
     int nextIndex = 0;
     std::priority_queue<SJob> next;
-    while(nextIndex < n || n) {
+    while(nextIndex < n || next.size()) {
         // Processes that have reached while the last process was processing
         while(nextIndex < n && processes[order[nextIndex]].arrivalTime <= lastEndTime) {
             next.emplace(processes[order[nextIndex]].executionTime, order[nextIndex]);
@@ -78,6 +79,7 @@ ExecutionSchedule SRTFScheduler::execute() {
         &execution, &current, &nextIndex, &n,
         &nextArrivalTime, &lastEndTime, &schedule, this
     ]() {
+        auto &b = execution.back(); 
         if(nextIndex < n && processes[nextIndex].arrivalTime < endTime(execution.back()))
             execution.back().duration -= endTime(execution.back()) - processes[nextIndex].arrivalTime;
         current.duration -= execution.back().duration;
@@ -124,6 +126,7 @@ ExecutionSchedule SRTFScheduler::execute() {
             }else {
                 next.emplace(current);
                 current = next.top();
+                next.pop();
                 execution.emplace_back(
                     execution.back().id,
                     lastEndTime,
@@ -132,6 +135,7 @@ ExecutionSchedule SRTFScheduler::execute() {
                     ExecutionType::Switching
                 );
                 ++schedule.contextSwitches;
+                lastEndTime = nextArrivalTime += switchingTime;
                 emplaceCurrent();
             }
         }
