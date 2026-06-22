@@ -37,14 +37,15 @@ public:
     ExecutionSchedule execute();
 };
 
+
+struct ShortJob {
+    int duration;
+    size_t index;
+    bool operator<(const ShortJob &other) const;
+};
+
 class SJFScheduler: public AbstractScheduler {
 public:
-    struct ShortJob {
-        int duration;
-        size_t index;
-        bool operator<(const ShortJob &other) const;
-    };
-
     /**
      * @brief Scheduler using shortest job first ordering.
      *
@@ -56,6 +57,23 @@ public:
      * @brief Executes the schedule using SJF ordering.
      *
      * @return ExecutionSchedule containing the ordered execution timeline.
+     */
+    ExecutionSchedule execute();
+};
+
+class SRTFScheduler: public AbstractScheduler {
+public:
+    /**
+     * @brief Scheduler using shortest remaining time first ordering.
+     * 
+     * Processes are selected by the shortest remaining time
+     */
+    SRTFScheduler(const ScheduleConfiguration &config);
+
+    /**
+     * @brief Executes the schedule using SRTF ordering.
+     * 
+     * @return ExecutionSchedule containing the detailed execution
      */
     ExecutionSchedule execute();
 };

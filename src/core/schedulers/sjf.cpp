@@ -8,7 +8,7 @@
 
 SJFScheduler::SJFScheduler(const ScheduleConfiguration &config): AbstractScheduler(config) { }
 
-using SJob = SJFScheduler::ShortJob;
+using SJob = ShortJob;
 
 bool SJob::operator<(const SJob &other) const {
     return std::tie(duration, index) > std::tie(other.duration, other.index);
@@ -22,17 +22,17 @@ ExecutionSchedule SJFScheduler::execute() {
     std::vector<size_t> order = orderOfArrival(processes);
 
     int lastEndTime = 0, nextArrivalTime = 0;
-    int next_index = 0;
+    int nextIndex = 0;
     std::priority_queue<SJob> next;
-    while(next_index < order.size() || next.size()) {
+    while(nextIndex < n || n) {
         // Processes that have reached while the last process was processing
-        while(next_index < order.size() && processes[order[next_index]].arrivalTime <= lastEndTime) {
-            next.emplace(processes[order[next_index]].executionTime, order[next_index]);
-            ++next_index;
+        while(nextIndex < n && processes[order[nextIndex]].arrivalTime <= lastEndTime) {
+            next.emplace(processes[order[nextIndex]].executionTime, order[nextIndex]);
+            ++nextIndex;
         }
         if(next.empty()) {
             // Last process ended when no other process was waiting, but more will arrive later
-            nextArrivalTime = processes[order[next_index]].arrivalTime;
+            nextArrivalTime = processes[order[nextIndex]].arrivalTime;
         }else {
             // Take next process with the smalles duration
             auto [duration, index] = next.top();
@@ -52,7 +52,93 @@ ExecutionSchedule SJFScheduler::execute() {
         }
     }
 
-    schedule.turnaroundTime /= processes.size();
+    schedule.turnaroundTime /= n;
+
+    return schedule;
+}
+
+ExecutionSchedule SRTFScheduler::execute() {
+    ExecutionSchedule schedule = {0.0, 0, 0, {}};
     
+    size_t n = processes.size();
+
+    if(n==0)
+        return schedule;
+
+    std::vector<ExecutionBlock> execution;
+    execution.reserve(n);
+    std::vector<size_t> order = orderOfArrival(processes);
+
+    int lastEndTime = 0, nextArrivalTime = 0;
+    int nextIndex = 0;
+    SJob current(0,-1);
+    std::priority_queue<SJob> next;
+    
+    auto prepareForArrival = [
+        &execution, &current, &nextIndex, &n,
+        &nextArrivalTime, &lastEndTime, &schedule, this
+    ]() {
+        if(nextIndex < n && processes[nextIndex].arrivalTime < endTime(execution.back()))
+            execution.back().duration -= endTime(execution.back()) - processes[nextIndex].arrivalTime;
+        current.duration -= execution.back().duration;
+        lastEndTime = nextArrivalTime = endTime(execution.back());
+        if(current.duration==0) {
+            schedule.turnaroundTime += endTime(execution.back()) - processes[current.index].arrivalTime;
+        }
+    };
+
+    auto emplaceCurrent = [
+        &execution, &current, &nextIndex, &n,
+        &nextArrivalTime, &lastEndTime, &schedule, this,
+        &prepareForArrival
+    ]() {
+        execution.emplace_back(
+            processes[current.index].id,
+            nextArrivalTime,
+            nextArrivalTime - lastEndTime,
+            current.duration,
+            ExecutionType::Executing
+        );
+        schedule.idleTime += nextArrivalTime - lastEndTime;
+        prepareForArrival();
+    };
+
+    while(nextIndex < n || next.size()) {
+        // Processes that have reached while the last process was processing
+        while(nextIndex < n && processes[order[nextIndex]].arrivalTime <= lastEndTime) {
+            next.emplace(processes[order[nextIndex]].executionTime, order[nextIndex]);
+            ++nextIndex;
+        }
+        if(current.duration==0) {
+            if(next.empty()) {
+                nextArrivalTime = processes[nextIndex].arrivalTime;
+            }else {
+                current = next.top();
+                next.pop();
+                emplaceCurrent();
+            }
+        }else {
+            if(next.empty() || next.top().duration >= current.duration) {
+                execution.back().duration += current.duration;
+                prepareForArrival();
+            }else {
+                next.emplace(current);
+                current = next.top();
+                execution.emplace_back(
+                    execution.back().id,
+                    lastEndTime,
+                    0,
+                    switchingTime,
+                    ExecutionType::Switching
+                );
+                ++schedule.contextSwitches;
+                emplaceCurrent();
+            }
+        }
+    }
+
+    schedule.turnaroundTime /= n;
+    schedule.execution = std::move(execution);
+
     return schedule;
 }
