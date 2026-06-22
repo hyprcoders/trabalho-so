@@ -20,6 +20,9 @@ EMSCRIPTEN_BINDINGS(scheduling) {
     register_vector<Process>("VectorProcess");
     register_vector<ExecutionBlock>("VectorExecutionBlock");
 
+    register_optional<int>();
+    register_optional<float>();
+
     value_object<Process>("Process")
         .field("id", &Process::id)
         .field("arrivalTime", &Process::arrivalTime)

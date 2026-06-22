@@ -37,6 +37,7 @@ struct ScheduleConfiguration {
 };
 
 struct ExecutionBlock {
+    int id;
     int startTime;
     int idleTime;
     int duration;
