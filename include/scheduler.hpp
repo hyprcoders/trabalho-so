@@ -77,3 +77,23 @@ public:
      */
     ExecutionSchedule execute();
 };
+
+
+class HPFScheduler: public AbstractScheduler {
+public:
+    /**
+     * @brief Scheduler using Highest Priority first ordering.
+     *
+     * Processes are scheduled preemptively so that the ones with highest priority are executed first
+     * Processes with equal priorities are scheduled like in round robin, with a portion of time (quantum)
+     *  being given to each one alternatively.
+     */
+    HPFScheduler(const ScheduleConfiguration &config);
+
+    /**
+     * @brief Executes the schedule using HPFS ordering.
+     *
+     * @return ExecutionSchedule containing the ordered execution timeline.
+     */
+    ExecutionSchedule execute();
+};
