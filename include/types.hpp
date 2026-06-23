@@ -14,7 +14,8 @@ enum class SchedulingAlgorithm {
     SJF,
     SRTF,
     RR,
-    EDF
+    EDF,
+    HPF
 };
 
 struct Process {

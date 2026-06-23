@@ -13,6 +13,7 @@ add_library(core_engine STATIC
     src/core/schedulers/scheduler.cpp
     src/core/schedulers/fifo.cpp
     src/core/schedulers/sjf.cpp
+    src/core/schedulers/hpf.cpp
     src/core/main.cpp
 )
 
