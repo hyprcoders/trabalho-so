@@ -15,6 +15,9 @@ ExecutionSchedule schedule(const ScheduleConfiguration& config) {
     case SchedulingAlgorithm::SRTF:
         execution = SRTFScheduler(config).execute();
         break;
+    case SchedulingAlgorithm::HPF:
+        execution = HPFScheduler(config).execute();
+        break;
     default:    
         break;
     }

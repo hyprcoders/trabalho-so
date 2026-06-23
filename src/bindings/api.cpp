@@ -15,7 +15,8 @@ EMSCRIPTEN_BINDINGS(scheduling) {
         .value("SJF", SchedulingAlgorithm::SJF)
         .value("SRTF", SchedulingAlgorithm::SRTF)
         .value("RR", SchedulingAlgorithm::RR)
-        .value("EDF", SchedulingAlgorithm::EDF);
+        .value("EDF", SchedulingAlgorithm::EDF)
+        .value("HPF", SchedulingAlgorithm::HPF);
 
     register_vector<Process>("VectorProcess");
     register_vector<ExecutionBlock>("VectorExecutionBlock");

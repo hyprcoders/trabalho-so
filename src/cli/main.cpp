@@ -54,7 +54,8 @@ static SchedulingAlgorithm promptAlgorithm() {
     std::cout << "  1 - FIFO\n";
     std::cout << "  2 - SJF\n";
     std::cout << "  3 - SRTF\n";
-    int choice = promptInt("Algorithm (1-3): ", 1, 3);
+    std::cout << "  4 - HPF\n";
+    int choice = promptInt("Algorithm (1-3): ", 1, 4);
 	switch (choice) {
 	case 1:
 		return SA::FIFO;
@@ -62,6 +63,8 @@ static SchedulingAlgorithm promptAlgorithm() {
 		return SA::SJF;
 	case 3:
 		return SA::SRTF;
+    case 4:
+        return SA::HPF;
 	}
 }
 

@@ -63,9 +63,6 @@ ExecutionSchedule SRTFScheduler::execute() {
     
     size_t n = processes.size();
 
-    if(n==0)
-        return schedule;
-
     std::vector<ExecutionBlock> execution;
     execution.reserve(n);
     std::vector<size_t> order = orderOfArrival(processes);
