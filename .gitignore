@@ -1,3 +1,4 @@
 build*
 .emscripten_cache
 bin/
+.vscode
