@@ -48,12 +48,13 @@ ExecutionSchedule HPFScheduler::execute() {
         }
 
         if(next.empty()) {
-            nextArrivalTime = processes[nextIndex].arrivalTime;
+            nextArrivalTime = processes[order[nextIndex]].arrivalTime;
         }else {
             auto current = next.top();
             next.pop();
             if(
-                execution.size() 
+                switchingTime > EPSILON
+                && execution.size() 
                 && execution.back().id != processes[current.index].id 
                 && remaingTime[execution.back().id]
             ) {

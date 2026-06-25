@@ -59,7 +59,7 @@ static SchedulingAlgorithm promptAlgorithm() {
     std::cout << "  5 - HPF\n";
     std::cout << "  6 - EDF\n";
     std::cout << "  7 - CFS-Sim\n";
-    int choice = promptInt("Algorithm (1-7): ", 1, 5);
+    int choice = promptInt("Algorithm (1-7): ", 1, 7);
 	switch (choice) {
 	case 1:
 		return SA::FIFO;

@@ -23,10 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }).then(instance => {
         Module = instance;
         console.log('WebAssembly module loaded successfully!');
-        // You can now interact with your C++ functions via Module.cwrap or Module.ccall
-        // For example, if you had a C++ function `int add(int a, int b)` exposed:
-        // const add = Module.cwrap('add', 'number', ['number', 'number']);
-        // console.log('1 + 2 =', add(1, 2));
     }).catch(e => {
         console.error('Failed to load WebAssembly module:', e);
     });
@@ -52,20 +48,19 @@ document.addEventListener('DOMContentLoaded', () => {
             pid: parseInt(document.getElementById('pid').value),
             arrivalTime: parseInt(document.getElementById('arrivalTime').value),
             burstTime: parseInt(document.getElementById('burstTime').value),
-            priority: parseInt(document.getElementById('priority').value) || 0 // Default to 0 if not provided
+            priority: parseInt(document.getElementById('priority').value) || 0 
         };
         processes.push(newProcess);
         renderProcesses();
-        // Increment PID for convenience
         document.getElementById('pid').value = newProcess.pid + 1;
-        processForm.reset(); // Clear form fields except PID
+        processForm.reset(); 
     });
 
     // Event listener for clearing all processes
     clearProcessesBtn.addEventListener('click', () => {
         processes = [];
         renderProcesses();
-        document.getElementById('pid').value = 1; // Reset PID
+        document.getElementById('pid').value = 1; 
     });
 
     // Event listener for running the simulation
@@ -88,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const process = {};
             process.id = p.pid;
             process.arrivalTime = p.arrivalTime;
-            process.deadline = p.arrivalTime + p.burstTime;  // Set deadline to arrival + burst while theres no deadline field
+            process.deadline = p.arrivalTime + p.burstTime;  
             process.executionTime = p.burstTime;
             process.priority = p.priority;
             process.pageCount = null;
@@ -109,20 +104,124 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Call the schedule function
             const result = Module.schedule(config);
-            const schedule = []
-            for(let i = 0; i < result.execution.size(); ++i){
 
-                schedule.push(result.execution.get(i))
+            // ==========================================
+            // VIS-TIMELINE GROUP SET UP
+            // ==========================================
+            const groupsArray = [];
+            
+            // Add individual Process groups
+            processes.forEach(p => {
+                groupsArray.push({
+                    id: p.pid,
+                    content: `PID: ${p.pid}`
+                });
+            });
+
+            // Add a special group for system Idle times
+            groupsArray.push({
+                id: 'system-idle',
+                content: 'System Idle'
+            });
+
+            const groups = new vis.DataSet(groupsArray);
+            // ==========================================
+
+            const itemsArray = [];
+            const now = new Date();
+            const scaleMs = 1000; 
+
+            for (let i = 0; i < result.execution.size(); ++i) {
+                const block = result.execution.get(i);
+                console.log(`block ${i} =`, block);
+                const start = block.startTime;
+                const duration = block.duration;
+                const idle = block.idleTime;
+                const pid = block.id;
+
+                // If there's idle time before this block, render it in the system-idle row
+                if (idle > 0) {
+                    const idleStart = start - idle;
+                    itemsArray.push({
+                        id: `idle-${i}`,
+                        group: 'system-idle', // Placed on the System Idle row
+                        content: 'Idle',
+                        start: idleStart,
+                        end: start,
+                        type: 'range',
+                        style: 'background-color: gray; color: white;'
+                    });
+                }
+
+                // Execution / switching / tardy block
+                let style = 'background-color: green; color: white;';
+                let contentLabel = `P${pid}`;
+
+                if (block.type === Module.ExecutionType.Executing) {
+                    style = 'background-color: green; color: white;';
+                    contentLabel = 'Executing';
+                } else if (block.type === Module.ExecutionType.Switching) {
+                    style = 'background-color: orange; color: white;';
+                    contentLabel = 'Context Switch';
+                } else if (block.type === Module.ExecutionType.Tardy) {
+                    style = 'background-color: red; color: white;';
+                    contentLabel = 'Tardy';
+                }
+
+                itemsArray.push({
+                    id: `exec-${i}`,
+                    group: pid, // Associates this piece of execution with its specific PID row
+                    content: contentLabel,
+                    start: start,
+                    end: start + duration,
+                    type: 'range',
+                    style: style
+                });
             }
-            result.schedule = schedule
-            // TODO: implement Gantt graph to show the scheduling and other schedule informations.
+
+            // Render timeline using vis-timeline
+            const container = document.getElementById('gantt-chart');
+            container.innerHTML = '';
+            const items = new vis.DataSet(itemsArray);
+            
+            const options = {
+                stack: false,
+                showCurrentTime: false,
+                orientation: 'top',
+                selectable: false,
+                margin: {
+                    item: 5,
+                    axis: 5
+                },
+                // ADD THESE PROPERTIES:
+                moment: function (date) {
+                    return vis.moment(date).utc(); 
+                },
+                format: {
+                    minorLabels: function (date, scale, step) {
+                        return date.valueOf(); // Forces numeric output instead of dates/times
+                    },
+                    majorLabels: function (date, scale, step) {
+                        return ''; // Disables the "25 June" header entirely
+                    }
+                },
+                start: 0, // Forces the visualization window to start exactly at 0
+                end: 25
+            };
+
+            // Pass 'groups' as the third argument to the constructor
+            new vis.Timeline(container, items, groups, options);
+
+            // Also show basic statistics
+            statistics.innerHTML = `
+                <p>Turnaround time: ${result.turnaroundTime.toFixed(2)}</p>
+                <p>Idle time: ${result.idleTime}</p>
+                <p>Context switches: ${result.contextSwitches}</p>`;
+
             console.log('Schedule result:', result);
         } catch (error) {
             console.error('Error running simulation:', error);
         }
-
-        ganttChart.innerHTML = `<p>Simulation results for ${selectedAlgorithm} will appear here.</p>`;
-        statistics.innerHTML = `<p>Statistics will appear here.</p>`;
     });
 
     // Initial render

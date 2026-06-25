@@ -41,6 +41,7 @@ EMSCRIPTEN_BINDINGS(scheduling) {
         .field("processes", &ScheduleConfiguration::processes);
 
     value_object<ExecutionBlock>("ExecutionBlock")
+        .field("id", &ExecutionBlock::id)
         .field("startTime", &ExecutionBlock::startTime)
         .field("idleTime", &ExecutionBlock::idleTime)
         .field("duration", &ExecutionBlock::duration)

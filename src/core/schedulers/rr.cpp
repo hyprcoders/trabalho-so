@@ -35,12 +35,12 @@ ExecutionSchedule RRScheduler::execute() {
         }
 
         if(next.empty()) {
-            nextArrivalTime = processes[nextIndex].arrivalTime;
+            nextArrivalTime = processes[order[nextIndex]].arrivalTime;
         }else {
             auto current = next.front();
             next.pop();
             const Process &process = processes[current];
-            if(execution.size() && execution.back().id != process.id && remaingTime[execution.back().id]>EPSILON) {
+            if(switchingTime > EPSILON && execution.size() && execution.back().id != process.id && remaingTime[execution.back().id]>EPSILON) {
                 execution.emplace_back(
                     execution.back().id,
                     lastEndTime,

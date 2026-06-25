@@ -34,7 +34,7 @@ ExecutionSchedule EDFScheduler::execute() {
     std::priority_queue<RTProcess> next;
 
     while(nextIndex < n || next.size()) {
-        while(nextIndex < n && processes[order[nextIndex]].arrivalTime <= lastEndTime + EPSILON) {
+        while(nextIndex < n && processes[order[nextIndex]].arrivalTime <= nextArrivalTime + EPSILON) {
             next.emplace(
                 order[nextIndex],
                 processes[order[nextIndex]].deadline
@@ -43,12 +43,12 @@ ExecutionSchedule EDFScheduler::execute() {
         }
 
         if(next.empty()) {
-            nextArrivalTime = processes[nextIndex].arrivalTime;
+            nextArrivalTime = processes[order[nextIndex]].arrivalTime;
         }else {
             auto current = next.top();
             next.pop();
             const Process &process = processes[current.index];
-            if(execution.size() && execution.back().id != process.id && remaingTime[execution.back().id]>EPSILON) {
+            if(switchingTime > EPSILON && execution.size() && execution.back().id != process.id && remaingTime[execution.back().id]>EPSILON) {
                 execution.emplace_back(
                     execution.back().id,
                     lastEndTime,
@@ -63,6 +63,8 @@ ExecutionSchedule EDFScheduler::execute() {
             if(nextIndex < n)
                 deltaT = std::min(deltaT, processes[order[nextIndex]].arrivalTime - nextArrivalTime);
             deltaT = std::max(deltaT, 0.0F);
+            if(deltaT <= EPSILON)
+                continue;
             if(execution.empty() || execution.back().id != process.id){
                 execution.emplace_back(
                     process.id,
