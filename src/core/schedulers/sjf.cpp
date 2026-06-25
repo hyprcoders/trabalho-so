@@ -22,7 +22,7 @@ ExecutionSchedule SJFScheduler::execute() {
     schedule.execution.reserve(n);
     std::vector<size_t> order = orderOfArrival(processes);
 
-    int lastEndTime = 0, nextArrivalTime = 0;
+    float lastEndTime = 0, nextArrivalTime = 0;
     int nextIndex = 0;
     std::priority_queue<SJob> next;
     while(nextIndex < n || next.size()) {

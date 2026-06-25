@@ -11,7 +11,7 @@ struct PriorityJob {
     int priority;
     int used; // Used to simulate a queue inside the priority queue for each priority value
     int index;
-    int duration;
+    float duration;
 
     bool operator<(const PriorityJob &a) const {
         return priority < a.priority 
@@ -33,7 +33,7 @@ ExecutionSchedule HPFScheduler::execute() {
     for(size_t i = 0; i < n; ++i)
         remaingTime[i] = processes[i].executionTime;
 
-    int lastEndTime = 0, nextArrivalTime = 0;
+    float lastEndTime = 0, nextArrivalTime = 0;
     int nextIndex = 0, now = 0;
     std::priority_queue<PJob> next;
     
@@ -68,7 +68,7 @@ ExecutionSchedule HPFScheduler::execute() {
                 ++schedule.contextSwitches;
                 lastEndTime = nextArrivalTime += switchingTime;
             }
-            int executeTime = std::min(current.duration, quantum);
+            float executeTime = std::min(current.duration, quantum);
 
             while(
                 nextIndex < n 

@@ -6,8 +6,8 @@
  */
 class AbstractScheduler {
 protected:
-    int quantum;
-    int switchingTime;
+    float quantum;
+    float switchingTime;
     int seed;
     std::optional<int> diskCost;
     std::optional<float> temperature;
@@ -95,5 +95,13 @@ public:
      *
      * @return ExecutionSchedule containing the ordered execution timeline.
      */
+    ExecutionSchedule execute();
+};
+
+class CFSSimScheduler: public AbstractScheduler {
+    public:
+    
+    CFSSimScheduler(const ScheduleConfiguration &config);
+
     ExecutionSchedule execute();
 };

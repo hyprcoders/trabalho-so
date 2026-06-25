@@ -10,44 +10,44 @@ enum class ExecutionType {
 
 enum class SchedulingAlgorithm {
     FIFO,
-    FCFS,
     SJF,
     SRTF,
     RR,
     EDF,
-    HPF
+    HPF,
+    CFSS
 };
 
 struct Process {
     int id;
-    int arrivalTime;
-    int deadline;
-    int executionTime;
+    float arrivalTime;
+    float deadline;
+    float executionTime;
     int priority;
     std::optional<int> pageCount;
 };
 
 struct ScheduleConfiguration {
-    int quantum;
-    int switchingTime;
+    float quantum;
+    float switchingTime;
     int seed;
     SchedulingAlgorithm schedulingAlgorithm;
-    std::optional<int> diskCost;
+    std::optional<float> diskCost;
     std::optional<float> temperature;
     std::vector<Process> processes;
 };
 
 struct ExecutionBlock {
     int id;
-    int startTime;
-    int idleTime;
-    int duration;
+    float startTime;
+    float idleTime;
+    float duration;
     ExecutionType type;
 };
 
 struct ExecutionSchedule {
     float turnaroundTime;
-    int idleTime;
+    float idleTime;
     int contextSwitches;
     std::vector<ExecutionBlock> execution;
 };

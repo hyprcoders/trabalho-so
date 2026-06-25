@@ -14,14 +14,14 @@ ExecutionSchedule FIFOScheduler::execute() {
     schedule.execution.reserve(n);
     std::vector<size_t> order = orderOfArrival(processes);
 
-    int lastEndTime = 0;
+    float lastEndTime = 0;
     for(const auto &index : order) {
         schedule.execution.emplace_back(
             processes[index].id,
             // Start when arrive or when the prevous process has ended
             std::max(lastEndTime, processes[index].arrivalTime),
             // The idle time will be the start times minus the lastEndTime
-            std::max(0, processes[index].arrivalTime - lastEndTime),
+            std::max(0.0F, processes[index].arrivalTime - lastEndTime),
             processes[index].executionTime,
             // There's no context switch or tardiness in FIFO
             ExecutionType::Executing
