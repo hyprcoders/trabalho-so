@@ -106,7 +106,7 @@ int main() {
         process.id = promptInt("  id: ");
         process.arrivalTime = promptInt<float>("  arrival time: ", 0);
         process.deadline = promptInt<float>("  deadline: ", 0);
-        process.executionTime = promptInt<float>("  execution time: ", 1);
+        process.executionTime = promptInt<float>("  execution time: ", 0.01);
         process.priority = promptInt("  priority: ", 0);
         process.pageCount = promptOptionalInt("  page count (leave empty if N/A): ");
         config.processes.push_back(process);

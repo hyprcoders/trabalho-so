@@ -14,8 +14,7 @@ struct PriorityJob {
     float duration;
 
     bool operator<(const PriorityJob &a) const {
-        return priority < a.priority 
-            || (priority == a.priority && std::tie(used, index) > std::tie(a.used, a.index)); 
+        return std::tie(priority, used, index) > std::tie(a.priority, a.used, a.index); 
     }
 };
 
@@ -81,7 +80,7 @@ ExecutionSchedule HPFScheduler::execute() {
                     processes[order[nextIndex]].executionTime
                 );
                 ++nextIndex;
-                if(next.top().priority > current.priority) {
+                if(next.top().priority < current.priority) {
                     executeTime = std::min(
                         executeTime, 
                         processes[next.top().index].arrivalTime - lastEndTime
@@ -104,7 +103,7 @@ ExecutionSchedule HPFScheduler::execute() {
                 }
                 remaingTime[current.index] -= executeTime;
                 int end = endTime(execution.back());
-                if(remaingTime[current.index] == 0) {
+                if(remaingTime[current.index] <= EPSILON) {
                     schedule.turnaroundTime += end - process.arrivalTime;
                 }else {
                     next.emplace(

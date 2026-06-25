@@ -5,7 +5,6 @@
 #include <vector>
 #include <queue>
 
-constexpr float EPSILON = 1e-6; 
 
 CFSSimScheduler::CFSSimScheduler(const ScheduleConfiguration &config): AbstractScheduler(config) {}
 

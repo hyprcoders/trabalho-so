@@ -38,12 +38,6 @@ public:
 };
 
 
-struct ShortJob {
-    int duration;
-    size_t index;
-    bool operator<(const ShortJob &other) const;
-};
-
 class SJFScheduler: public AbstractScheduler {
 public:
     /**

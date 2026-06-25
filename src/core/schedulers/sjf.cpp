@@ -9,11 +9,16 @@
 SJFScheduler::SJFScheduler(const ScheduleConfiguration &config): AbstractScheduler(config) { }
 SRTFScheduler::SRTFScheduler(const ScheduleConfiguration &config): AbstractScheduler(config) { }
 
+struct ShortJob {
+    float duration;
+    size_t index;
+    bool operator<(const ShortJob &other) const {
+        return std::tie(duration, index) > std::tie(other.duration, other.index);
+    }
+};
+
 using SJob = ShortJob;
 
-bool SJob::operator<(const SJob &other) const {
-    return std::tie(duration, index) > std::tie(other.duration, other.index);
-}
 
 ExecutionSchedule SJFScheduler::execute() {
     ExecutionSchedule schedule = {0.0, 0, 0, {}};
@@ -81,7 +86,7 @@ ExecutionSchedule SRTFScheduler::execute() {
             execution.back().duration -= endTime(execution.back()) - processes[nextIndex].arrivalTime;
         current.duration -= execution.back().duration;
         lastEndTime = nextArrivalTime = endTime(execution.back());
-        if(current.duration==0) {
+        if(current.duration<=EPSILON) {
             schedule.turnaroundTime += endTime(execution.back()) - processes[current.index].arrivalTime;
         }
     };
@@ -104,11 +109,11 @@ ExecutionSchedule SRTFScheduler::execute() {
 
     while(nextIndex < n || next.size()) {
         // Processes that have reached while the last process was processing
-        while(nextIndex < n && processes[order[nextIndex]].arrivalTime <= lastEndTime) {
+        while(nextIndex < n && processes[order[nextIndex]].arrivalTime <= lastEndTime + EPSILON) {
             next.emplace(processes[order[nextIndex]].executionTime, order[nextIndex]);
             ++nextIndex;
         }
-        if(current.duration==0) {
+        if(current.duration<=EPSILON) {
             if(next.empty()) {
                 nextArrivalTime = processes[nextIndex].arrivalTime;
             }else {
