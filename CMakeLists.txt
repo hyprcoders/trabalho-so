@@ -16,6 +16,7 @@ add_library(core_engine STATIC
     src/core/schedulers/hpf.cpp
     src/core/main.cpp
     src/core/schedulers/cfs.cpp
+    src/core/schedulers/edf.cpp
 )
 
 # including the include/ directory

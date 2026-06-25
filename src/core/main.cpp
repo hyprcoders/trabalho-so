@@ -19,6 +19,9 @@ ExecutionSchedule schedule(const ScheduleConfiguration& config) {
     case SA::HPF:
         execution = HPFScheduler(config).execute();
         break;
+    case SA::EDF:
+        execution = EDFScheduler(config).execute();
+        break;
     case SA::CFSS:
         execution = CFSSimScheduler(config).execute();
         break;

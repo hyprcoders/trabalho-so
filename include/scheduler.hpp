@@ -92,8 +92,15 @@ public:
     ExecutionSchedule execute();
 };
 
+class EDFScheduler: public AbstractScheduler {
+public:
+    EDFScheduler(const ScheduleConfiguration &config);
+
+    ExecutionSchedule execute();
+};
+
 class CFSSimScheduler: public AbstractScheduler {
-    public:
+public:
     
     CFSSimScheduler(const ScheduleConfiguration &config);
 

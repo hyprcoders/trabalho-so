@@ -50,6 +50,7 @@ struct ExecutionSchedule {
     float idleTime;
     int contextSwitches;
     std::vector<ExecutionBlock> execution;
+    std::optional<int> tardyCnt;
 };
 
 ExecutionSchedule schedule(const ScheduleConfiguration& config);
