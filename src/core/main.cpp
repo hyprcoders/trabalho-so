@@ -5,18 +5,22 @@
 ExecutionSchedule schedule(const ScheduleConfiguration& config) {
     ExecutionSchedule execution;
     
+    using SA = SchedulingAlgorithm;
     switch (config.schedulingAlgorithm) {
-    case SchedulingAlgorithm::FIFO:
+    case SA::FIFO:
         execution = FIFOScheduler(config).execute();
         break;
-    case SchedulingAlgorithm::SJF:
+    case SA::SJF:
         execution = SJFScheduler(config).execute();
         break;
-    case SchedulingAlgorithm::SRTF:
+    case SA::SRTF:
         execution = SRTFScheduler(config).execute();
         break;
-    case SchedulingAlgorithm::HPF:
+    case SA::HPF:
         execution = HPFScheduler(config).execute();
+        break;
+    case SA::CFSS:
+        execution = CFSSimScheduler(config).execute();
         break;
     default:    
         break;

@@ -12,10 +12,11 @@ static void discardLine() {
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
-static int promptInt(const std::string &label, int minValue = std::numeric_limits<int>::min(), int maxValue = std::numeric_limits<int>::max()) {
+template <typename T = int>
+static T promptInt(const std::string &label, T minValue = std::numeric_limits<T>::min(), T maxValue = std::numeric_limits<T>::max()) {
     while (true) {
         std::cout << label;
-        int value;
+        T value;
         if (!(std::cin >> value)) {
             std::cout << "Invalid input. Please enter an integer.\n";
             std::cin.clear();
@@ -55,7 +56,8 @@ static SchedulingAlgorithm promptAlgorithm() {
     std::cout << "  2 - SJF\n";
     std::cout << "  3 - SRTF\n";
     std::cout << "  4 - HPF\n";
-    int choice = promptInt("Algorithm (1-3): ", 1, 4);
+    std::cout << "  5 - CFS-Sim\n";
+    int choice = promptInt("Algorithm (1-5): ", 1, 5);
 	switch (choice) {
 	case 1:
 		return SA::FIFO;
@@ -65,6 +67,8 @@ static SchedulingAlgorithm promptAlgorithm() {
 		return SA::SRTF;
     case 4:
         return SA::HPF;
+    case 5:
+        return SA::CFSS;
 	}
 }
 
@@ -82,8 +86,8 @@ int main() {
     std::cout << "--------------------\n";
 
     int processCount = promptInt("Number of jobs: ", 1);
-    int quantum = promptInt("Quantum: ", 0);
-    int switchingTime = promptInt("Switching time: ", 0);
+    float quantum = promptInt<float>("Quantum: ", 0);
+    float switchingTime = promptInt<float>("Switching time: ", 0);
     SchedulingAlgorithm algorithm = promptAlgorithm();
 
     ScheduleConfiguration config;
@@ -100,9 +104,9 @@ int main() {
         std::cout << "\nProcess " << (i + 1) << ":\n";
         Process process;
         process.id = promptInt("  id: ");
-        process.arrivalTime = promptInt("  arrival time: ", 0);
-        process.deadline = promptInt("  deadline: ", 0);
-        process.executionTime = promptInt("  execution time: ", 1);
+        process.arrivalTime = promptInt<float>("  arrival time: ", 0);
+        process.deadline = promptInt<float>("  deadline: ", 0);
+        process.executionTime = promptInt<float>("  execution time: ", 0.01);
         process.priority = promptInt("  priority: ", 0);
         process.pageCount = promptOptionalInt("  page count (leave empty if N/A): ");
         config.processes.push_back(process);

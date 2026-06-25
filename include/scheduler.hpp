@@ -6,8 +6,8 @@
  */
 class AbstractScheduler {
 protected:
-    int quantum;
-    int switchingTime;
+    float quantum;
+    float switchingTime;
     int seed;
     std::optional<int> diskCost;
     std::optional<float> temperature;
@@ -37,12 +37,6 @@ public:
     ExecutionSchedule execute();
 };
 
-
-struct ShortJob {
-    int duration;
-    size_t index;
-    bool operator<(const ShortJob &other) const;
-};
 
 class SJFScheduler: public AbstractScheduler {
 public:
@@ -95,5 +89,13 @@ public:
      *
      * @return ExecutionSchedule containing the ordered execution timeline.
      */
+    ExecutionSchedule execute();
+};
+
+class CFSSimScheduler: public AbstractScheduler {
+    public:
+    
+    CFSSimScheduler(const ScheduleConfiguration &config);
+
     ExecutionSchedule execute();
 };
