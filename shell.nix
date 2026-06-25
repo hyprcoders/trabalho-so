@@ -6,6 +6,7 @@ pkgs.mkShell {
     emscripten
     ninja 
     gcc   
+    gdb
     python3
   ];
 

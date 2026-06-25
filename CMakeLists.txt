@@ -9,7 +9,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # This code knows nothing about WebAssembly or JS 
 # ---------------------------------------------------------
 add_library(core_engine STATIC
+    src/core/utils.cpp
+    src/core/schedulers/scheduler.cpp
+    src/core/schedulers/fifo.cpp
+    src/core/schedulers/sjf.cpp
+    src/core/schedulers/hpf.cpp
     src/core/main.cpp
+    src/core/schedulers/cfs.cpp
+    src/core/schedulers/edf.cpp
+    src/core/schedulers/rr.cpp
 )
 
 # including the include/ directory
@@ -29,6 +37,7 @@ if (EMSCRIPTEN)
         "--bind"
         "-sWASM=1"
         "-sMODULARIZE=1"
+        "-sEXPORT_ES6=1"
         "-sEXPORT_NAME='createModule'"
         "-sALLOW_MEMORY_GROWTH=1"
     )
