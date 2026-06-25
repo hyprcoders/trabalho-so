@@ -37,6 +37,25 @@ public:
     ExecutionSchedule execute();
 };
 
+class RRScheduler: public AbstractScheduler {
+public:
+    /** @brief Scheduler using first-in, first-out order with preemption
+     * 
+     * The processes are processed in order of arrival, but only run in the cpu for a
+     * slice of time equal to the quantum.
+     * If the process dont finish, it will be put in the end of the queue.
+     * All processes are put in the end of the queue as soon as they arrive.
+     */
+    RRScheduler(const ScheduleConfiguration &config);
+
+    /**
+     * @brief Executes the schedule using Round Robin ordering.
+     * 
+     * @return ExecutionSchedule containing the detailed execution
+     */
+    ExecutionSchedule execute();
+};
+
 
 class SJFScheduler: public AbstractScheduler {
 public:
