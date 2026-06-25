@@ -43,8 +43,12 @@
         <h2>Simulation Controls</h2>
         <label for="algorithm-select">Select Algorithm:</label>
         <select id="algorithm-select">
-            <option value="FCFS">FCFS (First-Come, First-Served)</option>
-            <!-- Other algorithms will be added here -->
+            <option value="FIFO">FIFO (First-In, First-Out)</option>
+            <option value="SJF">SJF (Shortest Job First)</option>
+            <option value="SRTF">SRTF (Shortest Remaining Time First)</option>
+            <option value="RR">RR (Round Robin)</option>
+            <option value="EDF">EDF (Earliest Deadline First)</option>
+            <option value="HPF">HPF (Highest Priority First)</option>
         </select>
         <button id="run-simulation">Run Simulation</button>
     </section>

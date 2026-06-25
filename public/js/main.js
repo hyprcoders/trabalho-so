@@ -82,12 +82,44 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedAlgorithm = algorithmSelect.value;
         console.log(`Running simulation with ${selectedAlgorithm} for processes:`, processes);
 
-        // TODO:
-        // 1. Pass 'processes' array and 'selectedAlgorithm' to the Wasm module.
-        //    This will require exposing C++ functions to accept process data.
-        // 2. Call the appropriate C++ scheduling function.
-        // 3. Receive simulation results (e.g., scheduled events, statistics) from Wasm.
-        // 4. Render these results in the ganttChart and statistics divs.
+        // Transform processes to match the C++ Process struct using VectorProcess
+        const transformedProcesses = new Module.VectorProcess();
+        processes.forEach(p => {
+            const process = {};
+            process.id = p.pid;
+            process.arrivalTime = p.arrivalTime;
+            process.deadline = p.arrivalTime + p.burstTime;  // Set deadline to arrival + burst while theres no deadline field
+            process.executionTime = p.burstTime;
+            process.priority = p.priority;
+            process.pageCount = null;
+            transformedProcesses.push_back(process);
+        });
+
+        // Create ScheduleConfiguration
+        const config = {
+            quantum: 0,
+            switchingTime: 0,
+            seed: 0,
+            schedulingAlgorithm: Module.SchedulingAlgorithm[selectedAlgorithm],
+            diskCost: null,
+            temperature: null,
+            processes: transformedProcesses
+        };
+
+        try {
+            // Call the schedule function
+            const result = Module.schedule(config);
+            const schedule = []
+            for(let i = 0; i < result.execution.size(); ++i){
+
+                schedule.push(result.execution.get(i))
+            }
+            result.schedule = schedule
+            // TODO: implement Gantt graph to show the scheduling and other schedule informations.
+            console.log('Schedule result:', result);
+        } catch (error) {
+            console.error('Error running simulation:', error);
+        }
 
         ganttChart.innerHTML = `<p>Simulation results for ${selectedAlgorithm} will appear here.</p>`;
         statistics.innerHTML = `<p>Statistics will appear here.</p>`;

@@ -11,7 +11,6 @@ EMSCRIPTEN_BINDINGS(scheduling) {
     
     enum_<SchedulingAlgorithm>("SchedulingAlgorithm")
         .value("FIFO", SchedulingAlgorithm::FIFO)
-        .value("FCFS", SchedulingAlgorithm::FCFS)
         .value("SJF", SchedulingAlgorithm::SJF)
         .value("SRTF", SchedulingAlgorithm::SRTF)
         .value("RR", SchedulingAlgorithm::RR)
