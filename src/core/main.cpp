@@ -16,6 +16,9 @@ ExecutionSchedule schedule(const ScheduleConfiguration& config) {
     case SA::SRTF:
         execution = SRTFScheduler(config).execute();
         break;
+    case SA::RR:
+        execution = RRScheduler(config).execute();
+        break;
     case SA::HPF:
         execution = HPFScheduler(config).execute();
         break;

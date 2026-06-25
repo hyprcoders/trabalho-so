@@ -55,10 +55,11 @@ static SchedulingAlgorithm promptAlgorithm() {
     std::cout << "  1 - FIFO\n";
     std::cout << "  2 - SJF\n";
     std::cout << "  3 - SRTF\n";
-    std::cout << "  4 - HPF\n";
-    std::cout << "  5 - EDF\n";
-    std::cout << "  6 - CFS-Sim\n";
-    int choice = promptInt("Algorithm (1-6): ", 1, 5);
+    std::cout << "  4 - RR\n";
+    std::cout << "  5 - HPF\n";
+    std::cout << "  6 - EDF\n";
+    std::cout << "  7 - CFS-Sim\n";
+    int choice = promptInt("Algorithm (1-7): ", 1, 5);
 	switch (choice) {
 	case 1:
 		return SA::FIFO;
@@ -67,10 +68,12 @@ static SchedulingAlgorithm promptAlgorithm() {
 	case 3:
 		return SA::SRTF;
     case 4:
-        return SA::HPF;
+        return SA::RR;
     case 5:
-        return SA::EDF;
+        return SA::HPF;
     case 6:
+        return SA::EDF;
+    case 7:
         return SA::CFSS;
 	}
 }
@@ -126,7 +129,7 @@ int main() {
 
     for (size_t index = 0; index < scheduleResult.execution.size(); ++index) {
         const ExecutionBlock &block = scheduleResult.execution[index];
-        std::cout << "    Block " << (index + 1) << ": id=" << block.id
+        std::cout << "    Block " << (index + 1) << ":\t id=" << block.id
                   << " start=" << block.startTime
                   << " duration=" << block.duration
                   << " idle=" << block.idleTime
