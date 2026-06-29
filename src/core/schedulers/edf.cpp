@@ -25,6 +25,7 @@ ExecutionSchedule EDFScheduler::execute() {
     std::vector<ExecutionBlock> execution;
     execution.reserve(n);
     std::vector<size_t> order = orderOfArrival(processes);
+    auto idToIndex = mapIdToIndex(processes);
     std::vector<float> remaingTime(n);
     for(size_t i = 0; i < n; ++i)
         remaingTime[i] = processes[i].executionTime;
@@ -48,7 +49,12 @@ ExecutionSchedule EDFScheduler::execute() {
             auto current = next.top();
             next.pop();
             const Process &process = processes[current.index];
-            if(switchingTime > EPSILON && execution.size() && execution.back().id != process.id && remaingTime[execution.back().id]>EPSILON) {
+            if(
+                switchingTime > EPSILON 
+                && execution.size() 
+                && execution.back().id != process.id 
+                && remaingTime[idToIndex[execution.back().id]]>EPSILON
+            ) {
                 execution.emplace_back(
                     execution.back().id,
                     lastEndTime,

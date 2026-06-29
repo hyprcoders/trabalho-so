@@ -4,17 +4,19 @@
 
 #include <vector>
 #include <queue>
+#include <iostream>
+#include <unordered_map>
 
 RRScheduler::RRScheduler(const ScheduleConfiguration &config): AbstractScheduler(config) {}
 
 ExecutionSchedule RRScheduler::execute() {
-    ExecutionSchedule schedule(0.0,0,0,{}); // last parameter is cnt of tardy processes
-
+    ExecutionSchedule schedule(0.0F,0.0F,0,{});
     size_t n = processes.size();
 
     std::vector<ExecutionBlock> execution;
     execution.reserve(n);
     std::vector<size_t> order = orderOfArrival(processes);
+    auto idToIndex = mapIdToIndex(processes);
     std::vector<float> remaingTime(n);
     for(size_t i = 0; i < n; ++i)
         remaingTime[i] = processes[i].executionTime;
@@ -38,9 +40,15 @@ ExecutionSchedule RRScheduler::execute() {
             nextArrivalTime = processes[order[nextIndex]].arrivalTime;
         }else {
             auto current = next.front();
+            std::cout << "current: " << current << '\n';
             next.pop();
             const Process &process = processes[current];
-            if(switchingTime > EPSILON && execution.size() && execution.back().id != process.id && remaingTime[execution.back().id]>EPSILON) {
+            if(
+                switchingTime > EPSILON 
+                && execution.size() 
+                && execution.back().id != process.id 
+                && remaingTime[idToIndex[execution.back().id]]>EPSILON
+            ) {
                 execution.emplace_back(
                     execution.back().id,
                     lastEndTime,

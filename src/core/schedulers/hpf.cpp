@@ -28,6 +28,7 @@ ExecutionSchedule HPFScheduler::execute() {
     std::vector<ExecutionBlock> execution;
     execution.reserve(n);
     std::vector<size_t> order = orderOfArrival(processes);
+    auto idToIndex = mapIdToIndex(processes);
     std::vector<size_t> remaingTime(n);
     for(size_t i = 0; i < n; ++i)
         remaingTime[i] = processes[i].executionTime;
@@ -56,7 +57,7 @@ ExecutionSchedule HPFScheduler::execute() {
                 switchingTime > EPSILON
                 && execution.size() 
                 && execution.back().id != processes[current.index].id 
-                && remaingTime[execution.back().id]
+                && remaingTime[idToIndex[execution.back().id]]
             ) {
                 execution.emplace_back(
                     execution.back().id,
