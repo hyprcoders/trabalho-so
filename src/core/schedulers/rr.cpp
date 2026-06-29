@@ -4,7 +4,6 @@
 
 #include <vector>
 #include <queue>
-#include <iostream>
 #include <unordered_map>
 
 RRScheduler::RRScheduler(const ScheduleConfiguration &config): AbstractScheduler(config) {}
@@ -40,7 +39,6 @@ ExecutionSchedule RRScheduler::execute() {
             nextArrivalTime = processes[order[nextIndex]].arrivalTime;
         }else {
             auto current = next.front();
-            std::cout << "current: " << current << '\n';
             next.pop();
             const Process &process = processes[current];
             if(
@@ -85,7 +83,8 @@ ExecutionSchedule RRScheduler::execute() {
         }  
     }
 
-    schedule.turnaroundTime /= n;
+    if(n > 0)
+        schedule.turnaroundTime /= n;
     schedule.execution = std::move(execution);
 
     return schedule;

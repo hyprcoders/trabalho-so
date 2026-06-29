@@ -10,4 +10,4 @@ float endTime(const ExecutionBlock &exec);
 
 std::vector<size_t> orderOfArrival(const std::vector<Process> &processes);
 
-std::unordered_map<size_t,size_t> mapIdToIndex(const std::vector<Process> &processes);
+std::unordered_map<int,size_t> mapIdToIndex(const std::vector<Process> &processes);

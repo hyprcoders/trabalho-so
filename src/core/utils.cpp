@@ -24,8 +24,8 @@ std::vector<size_t> orderOfArrival(const std::vector<Process> &processes) {
     return order;
 }
 
-std::unordered_map<size_t, size_t> mapIdToIndex(const std::vector<Process> &processes) {
-    std::unordered_map<size_t, size_t> mapped;
+std::unordered_map<int, size_t> mapIdToIndex(const std::vector<Process> &processes) {
+    std::unordered_map<int, size_t> mapped;
     mapped.reserve(processes.size());
     for(size_t i = 0; i < processes.size(); ++i)
         mapped[processes[i].id] = i;

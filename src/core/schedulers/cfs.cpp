@@ -111,7 +111,8 @@ ExecutionSchedule CFSSimScheduler::execute() {
         }  
     }
 
-    schedule.turnaroundTime /= n;
+    if(n > 0)
+        schedule.turnaroundTime /= n;
     schedule.execution = std::move(execution);
 
     return schedule;
