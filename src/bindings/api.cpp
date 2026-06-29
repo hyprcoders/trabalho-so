@@ -11,7 +11,6 @@ EMSCRIPTEN_BINDINGS(scheduling) {
     
     enum_<SchedulingAlgorithm>("SchedulingAlgorithm")
         .value("FIFO", SchedulingAlgorithm::FIFO)
-        .value("FCFS", SchedulingAlgorithm::FCFS)
         .value("SJF", SchedulingAlgorithm::SJF)
         .value("SRTF", SchedulingAlgorithm::SRTF)
         .value("RR", SchedulingAlgorithm::RR)
@@ -42,6 +41,7 @@ EMSCRIPTEN_BINDINGS(scheduling) {
         .field("processes", &ScheduleConfiguration::processes);
 
     value_object<ExecutionBlock>("ExecutionBlock")
+        .field("id", &ExecutionBlock::id)
         .field("startTime", &ExecutionBlock::startTime)
         .field("idleTime", &ExecutionBlock::idleTime)
         .field("duration", &ExecutionBlock::duration)

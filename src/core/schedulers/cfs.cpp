@@ -43,6 +43,7 @@ ExecutionSchedule CFSSimScheduler::execute() {
     std::vector<ExecutionBlock> execution;
     execution.reserve(n);
     std::vector<size_t> order = orderOfArrival(processes);
+    auto idToIndex = mapIdToIndex(processes);
     std::vector<float> remaingTime(n);
     for(size_t i = 0; i < n; ++i)
         remaingTime[i] = processes[i].executionTime;
@@ -52,7 +53,7 @@ ExecutionSchedule CFSSimScheduler::execute() {
     std::priority_queue<virtualJob> next;
 
     while(nextIndex < n || next.size()) {
-        while(nextIndex < n && processes[order[nextIndex]].arrivalTime <= lastEndTime + EPSILON) {
+        while(nextIndex < n && processes[order[nextIndex]].arrivalTime <= nextArrivalTime + EPSILON) {
             next.emplace(
                 order[nextIndex],
                 processes[order[nextIndex]].priority,
@@ -62,12 +63,17 @@ ExecutionSchedule CFSSimScheduler::execute() {
         }
 
         if(next.empty()) {
-            nextArrivalTime = processes[nextIndex].arrivalTime;
+            nextArrivalTime = processes[order[nextIndex]].arrivalTime;
         }else {
             auto current = next.top();
             next.pop();
             const Process &process = processes[current.index];
-            if(execution.size() && execution.back().id != process.id && remaingTime[execution.back().id]>EPSILON) {
+            if(
+                switchingTime > EPSILON 
+                && execution.size() 
+                && execution.back().id != process.id 
+                && remaingTime[idToIndex[execution.back().id]]>EPSILON
+            ) {
                 execution.emplace_back(
                     execution.back().id,
                     lastEndTime,

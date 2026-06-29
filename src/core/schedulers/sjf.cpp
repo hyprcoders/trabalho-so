@@ -79,11 +79,11 @@ ExecutionSchedule SRTFScheduler::execute() {
     
     auto prepareForArrival = [
         &execution, &current, &nextIndex, &n,
-        &nextArrivalTime, &lastEndTime, &schedule, this
+        &nextArrivalTime, &lastEndTime, &schedule, &order, this
     ]() {
         auto &b = execution.back(); 
         if(nextIndex < n && processes[nextIndex].arrivalTime < endTime(execution.back()))
-            execution.back().duration -= endTime(execution.back()) - processes[nextIndex].arrivalTime;
+            execution.back().duration -= endTime(execution.back()) - processes[order[nextIndex]].arrivalTime;
         current.duration -= execution.back().duration;
         lastEndTime = nextArrivalTime = endTime(execution.back());
         if(current.duration<=EPSILON) {
@@ -115,7 +115,7 @@ ExecutionSchedule SRTFScheduler::execute() {
         }
         if(current.duration<=EPSILON) {
             if(next.empty()) {
-                nextArrivalTime = processes[nextIndex].arrivalTime;
+                nextArrivalTime = processes[order[nextIndex]].arrivalTime;
             }else {
                 current = next.top();
                 next.pop();
@@ -129,15 +129,18 @@ ExecutionSchedule SRTFScheduler::execute() {
                 next.emplace(current);
                 current = next.top();
                 next.pop();
-                execution.emplace_back(
-                    execution.back().id,
-                    lastEndTime,
-                    0,
-                    switchingTime,
-                    ExecutionType::Switching
-                );
-                ++schedule.contextSwitches;
-                lastEndTime = nextArrivalTime += switchingTime;
+                if(switchingTime > EPSILON) {
+
+                    execution.emplace_back(
+                        execution.back().id,
+                        lastEndTime,
+                        0,
+                        switchingTime,
+                        ExecutionType::Switching
+                    );
+                    ++schedule.contextSwitches;
+                    lastEndTime = nextArrivalTime += switchingTime;
+                }
                 emplaceCurrent();
             }
         }
