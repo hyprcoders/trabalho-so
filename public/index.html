@@ -26,8 +26,12 @@
                 <label for="burstTime">Burst Time:</label>
                 <input type="number" id="burstTime" value="5" required>
             </div>
-            <div class="form-group">
-                <label for="priority">Priority (optional):</label>
+            <div class="form-group" id="deadline-group" style="display: none;">
+                <label for="deadline">Deadline:</label>
+                <input type="number" id="deadline" value="0">
+            </div>
+            <div class="form-group" id="priority-group" style="display: none;">
+                <label for="priority">Priority:</label>
                 <input type="number" id="priority" value="0">
             </div>
             <button type="submit">Add Process</button>
@@ -49,7 +53,16 @@
             <option value="RR">RR (Round Robin)</option>
             <option value="EDF">EDF (Earliest Deadline First)</option>
             <option value="HPF">HPF (Highest Priority First)</option>
+            <option value="CFSS">CFS-Sim</option>
         </select>
+        <div class="form-group">
+            <label for="quantum">Quantum:</label>
+            <input type="number" id="quantum" value="0" min="0">
+        </div>
+        <div class="form-group">
+            <label for="switchingTime">Switching time:</label>
+            <input type="number" id="switchingTime" value="0" min="0">
+        </div>
         <button id="run-simulation">Run Simulation</button>
     </section>
 

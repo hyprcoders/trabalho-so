@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearProcessesBtn = document.getElementById('clear-processes');
     const runSimulationBtn = document.getElementById('run-simulation');
     const algorithmSelect = document.getElementById('algorithm-select');
+    const quantumInput = document.getElementById('quantum');
+    const switchingTimeInput = document.getElementById('switchingTime');
+    const deadlineGroup = document.getElementById('deadline-group');
+    const priorityGroup = document.getElementById('priority-group');
     const ganttChart = document.getElementById('gantt-chart');
     const statistics = document.getElementById('statistics');
 
@@ -36,10 +40,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         processes.forEach(p => {
             const li = document.createElement('li');
-            li.textContent = `PID: ${p.pid}, Arrival: ${p.arrivalTime}, Burst: ${p.burstTime}, Priority: ${p.priority}`;
+            const extra = p.deadline !== undefined
+                ? `Deadline: ${p.deadline}`
+                : `Priority: ${p.priority}`;
+            li.textContent = `PID: ${p.pid}, Arrival: ${p.arrivalTime}, Burst: ${p.burstTime}, ${extra}`;
             processList.appendChild(li);
         });
     }
+
+    function updateProcessFieldVisibility() {
+        const algorithm = algorithmSelect.value;
+        const showDeadline = algorithm === 'EDF';
+        const showPriority = algorithm === 'HPF' || algorithm === 'CFSS';
+
+        deadlineGroup.style.display = showDeadline ? 'block' : 'none';
+        priorityGroup.style.display = showPriority ? 'block' : 'none';
+    }
+
+    algorithmSelect.addEventListener('change', updateProcessFieldVisibility);
+    updateProcessFieldVisibility();
 
     // Event listener for adding a new process
     processForm.addEventListener('submit', (event) => {
@@ -47,13 +66,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const newProcess = {
             pid: parseInt(document.getElementById('pid').value),
             arrivalTime: parseInt(document.getElementById('arrivalTime').value),
-            burstTime: parseInt(document.getElementById('burstTime').value),
-            priority: parseInt(document.getElementById('priority').value) || 0 
+            burstTime: parseInt(document.getElementById('burstTime').value)
         };
+
+        if (algorithmSelect.value === 'EDF') {
+            newProcess.deadline = parseInt(document.getElementById('deadline').value);
+        } else if (algorithmSelect.value === 'HPF' || algorithmSelect.value === 'CFSS') {
+            newProcess.priority = parseInt(document.getElementById('priority').value) || 0;
+        } else {
+            newProcess.priority = 0;
+        }
+
         processes.push(newProcess);
         renderProcesses();
         document.getElementById('pid').value = newProcess.pid + 1;
-        processForm.reset(); 
+        processForm.reset();
+        updateProcessFieldVisibility();
     });
 
     // Event listener for clearing all processes
@@ -75,6 +103,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const selectedAlgorithm = algorithmSelect.value;
+        const quantum = parseFloat(quantumInput.value) || 0;
+        const switchingTime = parseFloat(switchingTimeInput.value) || 0;
+
         console.log(`Running simulation with ${selectedAlgorithm} for processes:`, processes);
 
         // Transform processes to match the C++ Process struct using VectorProcess
@@ -83,17 +114,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const process = {};
             process.id = p.pid;
             process.arrivalTime = p.arrivalTime;
-            process.deadline = p.arrivalTime + p.burstTime;  
+            process.deadline = p.deadline !== undefined ? p.deadline : p.arrivalTime + p.burstTime;
             process.executionTime = p.burstTime;
-            process.priority = p.priority;
+            process.priority = p.priority || 0;
             process.pageCount = null;
             transformedProcesses.push_back(process);
+            console.log(process,transformedProcesses.get(transformedProcesses.size()-1))
         });
 
         // Create ScheduleConfiguration
         const config = {
-            quantum: 0,
-            switchingTime: 0,
+            quantum,
+            switchingTime,
             seed: 0,
             schedulingAlgorithm: Module.SchedulingAlgorithm[selectedAlgorithm],
             diskCost: null,
@@ -103,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Call the schedule function
+            console.log("config=",config)
             const result = Module.schedule(config);
 
             // ==========================================
