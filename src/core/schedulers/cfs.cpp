@@ -27,7 +27,7 @@ struct virtualJob {
     int priority;
     float vtime;
     bool operator<(const virtualJob &a) const {
-        return std::tie(vtime, priority, a.index) > std::tie(a.vtime, a.priority, index);
+        return std::tie(vtime, priority, index) > std::tie(a.vtime, a.priority, a.index);
     }
     virtualJob &addTime(float time) {
         vtime += time * weight(priority);
