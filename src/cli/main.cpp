@@ -59,8 +59,8 @@ static SchedulingAlgorithm promptAlgorithm() {
     std::cout << "  5 - HPF\n";
     std::cout << "  6 - EDF\n";
     std::cout << "  7 - CFS-Sim\n";
-    std::cout << "  8 - FPEA\n";
-    std::cout << "  9 - MHPEA\n";
+    std::cout << "  8 - FPET\n";
+    std::cout << "  9 - MHPET\n";
     int choice = promptInt("Algorithm (1-9): ", 1, 9);
 	switch (choice) {
 	case 1:
@@ -78,9 +78,9 @@ static SchedulingAlgorithm promptAlgorithm() {
     case 7:
         return SA::CFSS;
     case 8:
-        return SA::FPEA;
+        return SA::FPET;
     case 9:
-        return SA::MHPEA;
+        return SA::MHPET;
 	}
 }
 
@@ -102,7 +102,7 @@ int main() {
     float switchingTime = promptInt<float>("Switching time: ", 0);
     SchedulingAlgorithm algorithm = promptAlgorithm();
     std::optional<float> temperature = std::nullopt;
-    if(algorithm == SchedulingAlgorithm::MHPEA)
+    if(algorithm == SchedulingAlgorithm::MHPET)
         temperature = promptInt<float>("Temperature: ", 1);
 
     ScheduleConfiguration config;

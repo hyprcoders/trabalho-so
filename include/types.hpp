@@ -16,8 +16,8 @@ enum class SchedulingAlgorithm {
     EDF,
     HPF,
     CFSS,
-    FPEA,
-    MHPEA
+    FPET,
+    MHPET
 };
 
 struct Process {

@@ -175,7 +175,7 @@ protected:
     float getValue(const std::vector<float> &pushs, const std::vector<int> &order);
 };
 
-class FPEAScheduler: public EAScheduler {
+class FPETScheduler: public EAScheduler {
 public:
     /** @brief Scheduler that minimizes earliness and tardiness for a fixed permutation of processes
      * 
@@ -187,7 +187,7 @@ public:
      * and then applies a greedy right to left push until the sum of Earliness and Tardiness
      * is minimized.
      */
-    FPEAScheduler(const ScheduleConfiguration &config);
+    FPETScheduler(const ScheduleConfiguration &config);
 
     /**
      * @brief Returns the execution of the process that minimizes earliness and taridness for a fixed permutation.
@@ -197,7 +197,7 @@ public:
     ExecutionSchedule execute();
 };
 
-class MHPEAScheduler: public EAScheduler {
+class MHPETScheduler: public EAScheduler {
 public:
     /** @brief Scheduler using a meta-heuristic for permutational earliness and tardiness scheduling problem
      * 
@@ -207,7 +207,7 @@ public:
      * and the value of the quantum is used as decay. The given seed is used to generate random values.
      * 
      * The value of an order of processes is the sum of earliness and tardiness in the optimal timetabled schedule
-     * of this order. This value can be calculated exactly with a polynomial time algorithm used in FPEA scheduler
+     * of this order. This value can be calculated exactly with a polynomial time algorithm used in FPET scheduler
      * ans is calculated for each random neighbor solution (order).
      * 
      * Given that a new solution has value V and the current has value C and the current temperature is T,
@@ -216,7 +216,7 @@ public:
      * (smaller) value, the it should always be yes. Otherwise, the higher is T, the higher should be the
      * probability of acceptance, and the lower is T, the lower should be this probability.
      */
-    MHPEAScheduler(const ScheduleConfiguration &config);
+    MHPETScheduler(const ScheduleConfiguration &config);
 
     /**
      * @brief Returns the execution of the process that minimizes earliness and taridness for the best found order.

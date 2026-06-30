@@ -10,8 +10,8 @@
 
 
 EAScheduler::EAScheduler(const ScheduleConfiguration &config): AbstractScheduler(config) {}
-FPEAScheduler::FPEAScheduler(const ScheduleConfiguration &config): EAScheduler(config) {}
-MHPEAScheduler::MHPEAScheduler(const ScheduleConfiguration &config): EAScheduler(config) {}
+FPETScheduler::FPETScheduler(const ScheduleConfiguration &config): EAScheduler(config) {}
+MHPETScheduler::MHPETScheduler(const ScheduleConfiguration &config): EAScheduler(config) {}
 
 struct Block {
     int potential;
@@ -89,7 +89,7 @@ float EAScheduler::getValue(const std::vector<float> &pushs, const std::vector<i
     return earliness + tardiness;
 }
 
-ExecutionSchedule FPEAScheduler::execute() {
+ExecutionSchedule FPETScheduler::execute() {
     ExecutionSchedule schedule(0.0f,0,0,{});
 
     size_t n = processes.size();
@@ -143,7 +143,7 @@ struct Solution {
     }
 };
 
-bool MHPEAScheduler::PAF(double current, double next, double temperature, std::mt19937 &rng) {
+bool MHPETScheduler::PAF(double current, double next, double temperature, std::mt19937 &rng) {
     double probability =  std::exp((current-next)/temperature);
     if(probability > 1) 
         return true;
@@ -153,7 +153,7 @@ bool MHPEAScheduler::PAF(double current, double next, double temperature, std::m
     }
 }
 
-std::vector<int> MHPEAScheduler::simulatedAnnealing() {
+std::vector<int> MHPETScheduler::simulatedAnnealing() {
     size_t n = processes.size();
     Solution sol(n);
     Solution bestSol = sol;
@@ -179,7 +179,7 @@ std::vector<int> MHPEAScheduler::simulatedAnnealing() {
     return bestSol.order;
 }
 
-ExecutionSchedule MHPEAScheduler::execute() {
+ExecutionSchedule MHPETScheduler::execute() {
     ExecutionSchedule schedule(0.0f,0,0,{});
 
     size_t n = processes.size();

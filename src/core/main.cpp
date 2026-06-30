@@ -28,11 +28,11 @@ ExecutionSchedule schedule(const ScheduleConfiguration& config) {
     case SA::CFSS:
         execution = CFSSimScheduler(config).execute();
         break;
-    case SA::FPEA:
-        execution = FPEAScheduler(config).execute();
+    case SA::FPET:
+        execution = FPETScheduler(config).execute();
         break;
-    case SA::MHPEA:
-        execution = MHPEAScheduler(config).execute();
+    case SA::MHPET:
+        execution = MHPETScheduler(config).execute();
         break;
     default:    
         break;
