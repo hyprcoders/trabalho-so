@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <numeric>
 #include <tuple>
+#include <unordered_map>
 
 #include "types.hpp"
 #include "utils.hpp"
@@ -21,4 +22,12 @@ std::vector<size_t> orderOfArrival(const std::vector<Process> &processes) {
     );
 
     return order;
+}
+
+std::unordered_map<int, size_t> mapIdToIndex(const std::vector<Process> &processes) {
+    std::unordered_map<int, size_t> mapped;
+    mapped.reserve(processes.size());
+    for(size_t i = 0; i < processes.size(); ++i)
+        mapped[processes[i].id] = i;
+    return mapped;
 }

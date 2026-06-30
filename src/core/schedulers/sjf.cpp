@@ -72,18 +72,18 @@ ExecutionSchedule SRTFScheduler::execute() {
     execution.reserve(n);
     std::vector<size_t> order = orderOfArrival(processes);
 
-    int lastEndTime = 0, nextArrivalTime = 0;
+    float lastEndTime = 0.0F, nextArrivalTime = 0.0F;
     int nextIndex = 0;
-    SJob current(0,-1);
+    SJob current{0.0F, static_cast<size_t>(-1)};
     std::priority_queue<SJob> next;
     
     auto prepareForArrival = [
         &execution, &current, &nextIndex, &n,
-        &nextArrivalTime, &lastEndTime, &schedule, this
+        &nextArrivalTime, &lastEndTime, &schedule, &order, this
     ]() {
         auto &b = execution.back(); 
-        if(nextIndex < n && processes[nextIndex].arrivalTime < endTime(execution.back()))
-            execution.back().duration -= endTime(execution.back()) - processes[nextIndex].arrivalTime;
+        if(nextIndex < n && processes[order[nextIndex]].arrivalTime < endTime(execution.back()))
+            execution.back().duration -= endTime(execution.back()) - processes[order[nextIndex]].arrivalTime;
         current.duration -= execution.back().duration;
         lastEndTime = nextArrivalTime = endTime(execution.back());
         if(current.duration<=EPSILON) {
@@ -115,7 +115,7 @@ ExecutionSchedule SRTFScheduler::execute() {
         }
         if(current.duration<=EPSILON) {
             if(next.empty()) {
-                nextArrivalTime = processes[nextIndex].arrivalTime;
+                nextArrivalTime = processes[order[nextIndex]].arrivalTime;
             }else {
                 current = next.top();
                 next.pop();
@@ -129,21 +129,25 @@ ExecutionSchedule SRTFScheduler::execute() {
                 next.emplace(current);
                 current = next.top();
                 next.pop();
-                execution.emplace_back(
-                    execution.back().id,
-                    lastEndTime,
-                    0,
-                    switchingTime,
-                    ExecutionType::Switching
-                );
-                ++schedule.contextSwitches;
-                lastEndTime = nextArrivalTime += switchingTime;
+                if(switchingTime > EPSILON) {
+
+                    execution.emplace_back(
+                        execution.back().id,
+                        lastEndTime,
+                        0,
+                        switchingTime,
+                        ExecutionType::Switching
+                    );
+                    ++schedule.contextSwitches;
+                    lastEndTime = nextArrivalTime += switchingTime;
+                }
                 emplaceCurrent();
             }
         }
     }
 
-    schedule.turnaroundTime /= n;
+    if(n > 0)
+        schedule.turnaroundTime /= n;
     schedule.execution = std::move(execution);
 
     return schedule;

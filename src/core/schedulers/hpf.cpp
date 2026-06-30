@@ -28,7 +28,8 @@ ExecutionSchedule HPFScheduler::execute() {
     std::vector<ExecutionBlock> execution;
     execution.reserve(n);
     std::vector<size_t> order = orderOfArrival(processes);
-    std::vector<size_t> remaingTime(n);
+    auto idToIndex = mapIdToIndex(processes);
+    std::vector<float> remaingTime(n);
     for(size_t i = 0; i < n; ++i)
         remaingTime[i] = processes[i].executionTime;
 
@@ -48,14 +49,15 @@ ExecutionSchedule HPFScheduler::execute() {
         }
 
         if(next.empty()) {
-            nextArrivalTime = processes[nextIndex].arrivalTime;
+            nextArrivalTime = processes[order[nextIndex]].arrivalTime;
         }else {
             auto current = next.top();
             next.pop();
             if(
-                execution.size() 
+                switchingTime > EPSILON
+                && execution.size() 
                 && execution.back().id != processes[current.index].id 
-                && remaingTime[execution.back().id]
+                && remaingTime[idToIndex[execution.back().id]] > EPSILON
             ) {
                 execution.emplace_back(
                     execution.back().id,
@@ -102,7 +104,7 @@ ExecutionSchedule HPFScheduler::execute() {
                     execution.back().duration += executeTime;
                 }
                 remaingTime[current.index] -= executeTime;
-                int end = endTime(execution.back());
+                float end = endTime(execution.back());
                 if(remaingTime[current.index] <= EPSILON) {
                     schedule.turnaroundTime += end - process.arrivalTime;
                 }else {
@@ -118,7 +120,8 @@ ExecutionSchedule HPFScheduler::execute() {
         }
     }
 
-    schedule.turnaroundTime /= n;
+    if(n > 0)
+        schedule.turnaroundTime /= n;
     schedule.execution = std::move(execution);
 
     return schedule;
