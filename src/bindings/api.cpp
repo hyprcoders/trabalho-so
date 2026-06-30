@@ -17,7 +17,8 @@ EMSCRIPTEN_BINDINGS(scheduling) {
         .value("EDF", SchedulingAlgorithm::EDF)
         .value("HPF", SchedulingAlgorithm::HPF)
         .value("CFSS", SchedulingAlgorithm::CFSS)
-        .value("FPEA", SchedulingAlgorithm::FPEA);
+        .value("FPEA", SchedulingAlgorithm::FPEA)
+        .value("MHPEA", SchedulingAlgorithm::MHPEA);
 
     register_vector<Process>("VectorProcess");
     register_vector<ExecutionBlock>("VectorExecutionBlock");

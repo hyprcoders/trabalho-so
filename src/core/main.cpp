@@ -31,6 +31,9 @@ ExecutionSchedule schedule(const ScheduleConfiguration& config) {
     case SA::FPEA:
         execution = FPEAScheduler(config).execute();
         break;
+    case SA::MHPEA:
+        execution = MHPEAScheduler(config).execute();
+        break;
     default:    
         break;
     }

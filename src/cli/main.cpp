@@ -60,7 +60,8 @@ static SchedulingAlgorithm promptAlgorithm() {
     std::cout << "  6 - EDF\n";
     std::cout << "  7 - CFS-Sim\n";
     std::cout << "  8 - FPEA\n";
-    int choice = promptInt("Algorithm (1-8): ", 1, 8);
+    std::cout << "  9 - MHPEA\n";
+    int choice = promptInt("Algorithm (1-9): ", 1, 9);
 	switch (choice) {
 	case 1:
 		return SA::FIFO;
@@ -78,6 +79,8 @@ static SchedulingAlgorithm promptAlgorithm() {
         return SA::CFSS;
     case 8:
         return SA::FPEA;
+    case 9:
+        return SA::MHPEA;
 	}
 }
 
@@ -98,6 +101,9 @@ int main() {
     float quantum = promptInt<float>("Quantum: ", 0);
     float switchingTime = promptInt<float>("Switching time: ", 0);
     SchedulingAlgorithm algorithm = promptAlgorithm();
+    std::optional<float> temperature = std::nullopt;
+    if(algorithm == SchedulingAlgorithm::MHPEA)
+        temperature = promptInt<float>("Temperature: ", 1);
 
     ScheduleConfiguration config;
     config.quantum = quantum;
@@ -105,7 +111,7 @@ int main() {
     config.seed = 0;
     config.schedulingAlgorithm = algorithm;
     config.diskCost = std::nullopt;
-    config.temperature = std::nullopt;
+    config.temperature = temperature;
     config.processes.clear();
 
     std::cout << "\nEnter process details:\n";
