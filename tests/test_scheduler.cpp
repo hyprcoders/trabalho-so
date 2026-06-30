@@ -1,4 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/internal/catch_context.hpp>
+#include <catch2/interfaces/catch_interfaces_config.hpp>
 #include <catch2/catch_approx.hpp>
 #include "types.hpp"
 
@@ -8,7 +10,7 @@ TEST_CASE("Scheduler basic properties", "[scheduler]") {
     ScheduleConfiguration cfg;
     cfg.quantum = 100.0f;
     cfg.switchingTime = 0.0f;
-    cfg.seed = 0;
+    cfg.seed = Catch::getCurrentContext().getConfig()->rngSeed();
 
     SECTION("FIFO sums execution time") {
         cfg.schedulingAlgorithm = SchedulingAlgorithm::FIFO;
@@ -108,12 +110,44 @@ TEST_CASE("Scheduler basic properties", "[scheduler]") {
         cfg.processes = {p1, p2};
 
         auto res = schedule(cfg);
-        // Expect at least three execution blocks: p1, p2, p1
         REQUIRE(res.execution.size() == 4);
         REQUIRE(res.execution[0].id == 1);
         REQUIRE(res.execution[1].id == 1);
         REQUIRE(res.execution[2].id == 2);
         REQUIRE(res.execution[3].id == 1);
         REQUIRE(res.turnaroundTime == Catch::Approx(3.0f).epsilon(EPSILON));
+        cfg.quantum = 100.0f;
+        cfg.switchingTime = 0.0f;
     }
+
+    SECTION("FPET minimizes sum of earliness and tardines for a fixed permutation") {
+        cfg.schedulingAlgorithm = SchedulingAlgorithm::FPET;
+        Process p1{1, 0.0f, 6.0f, 3.0f, 1, std::nullopt};
+        Process p2{2, 0.0f, 9.0f, 4.0f, 1, std::nullopt};
+        cfg.processes = {p1, p2};
+
+        auto res = schedule(cfg);
+        REQUIRE(res.execution.size() == 2);
+        REQUIRE(res.execution[0].id == 1);
+        REQUIRE(res.execution[1].id == 2);
+        REQUIRE(res.earliness.value() + res.tardiness.value() == Catch::Approx(1.0f).epsilon(EPSILON));
+    }
+
+    
+
+    SECTION("FPET minimizes sum of earliness and tardines for a fixed permutation") {
+        cfg.schedulingAlgorithm = SchedulingAlgorithm::MHPET;
+        Process p1{1, 0.0f, 6.0f, 3.0f, 1, std::nullopt};
+        Process p2{2, 0.0f, 9.0f, 4.0f, 1, std::nullopt};
+        Process p3{3, 0.0f, 12.0f, 5.0f, 1, std::nullopt};
+        Process p4{4, 0.0f, 3.0f, 2.0f, 1, std::nullopt};
+        cfg.processes = {p1, p2, p3, p4};
+        cfg.temperature = 100.0f;
+        cfg.quantum = 0.95f;
+
+        auto res = schedule(cfg);
+        REQUIRE(res.execution.size() == 4);
+        REQUIRE(res.earliness.value() + res.tardiness.value() <= Catch::Approx(15.0).epsilon(EPSILON));
+    }
+    
 }

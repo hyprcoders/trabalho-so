@@ -59,7 +59,9 @@ static SchedulingAlgorithm promptAlgorithm() {
     std::cout << "  5 - HPF\n";
     std::cout << "  6 - EDF\n";
     std::cout << "  7 - CFS-Sim\n";
-    int choice = promptInt("Algorithm (1-7): ", 1, 7);
+    std::cout << "  8 - FPET\n";
+    std::cout << "  9 - MHPET\n";
+    int choice = promptInt("Algorithm (1-9): ", 1, 9);
 	switch (choice) {
 	case 1:
 		return SA::FIFO;
@@ -75,6 +77,10 @@ static SchedulingAlgorithm promptAlgorithm() {
         return SA::EDF;
     case 7:
         return SA::CFSS;
+    case 8:
+        return SA::FPET;
+    case 9:
+        return SA::MHPET;
 	}
 }
 
@@ -95,6 +101,9 @@ int main() {
     float quantum = promptInt<float>("Quantum: ", 0);
     float switchingTime = promptInt<float>("Switching time: ", 0);
     SchedulingAlgorithm algorithm = promptAlgorithm();
+    std::optional<float> temperature = std::nullopt;
+    if(algorithm == SchedulingAlgorithm::MHPET)
+        temperature = promptInt<float>("Temperature: ", 1);
 
     ScheduleConfiguration config;
     config.quantum = quantum;
@@ -102,7 +111,7 @@ int main() {
     config.seed = 0;
     config.schedulingAlgorithm = algorithm;
     config.diskCost = std::nullopt;
-    config.temperature = std::nullopt;
+    config.temperature = temperature;
     config.processes.clear();
 
     std::cout << "\nEnter process details:\n";
@@ -125,6 +134,10 @@ int main() {
 	std::cout << "  turnaround time: " << scheduleResult.turnaroundTime << "\n";
     std::cout << "  idle time: " << scheduleResult.idleTime << "\n";
     std::cout << "  context switches: " << scheduleResult.contextSwitches << "\n";
+    if(scheduleResult.earliness.has_value())
+        std::cout << "  earliness: " << scheduleResult.earliness.value() << "\n";
+    if(scheduleResult.tardiness.has_value())
+        std::cout << "  tardiness: " << scheduleResult.tardiness.value() << "\n";
     std::cout << "  execution blocks: " << scheduleResult.execution.size() << "\n";
 
     for (size_t index = 0; index < scheduleResult.execution.size(); ++index) {
