@@ -33,7 +33,8 @@ ExecutionSchedule FIFOScheduler::execute() {
         schedule.idleTime += schedule.execution.back().idleTime;
     }
 
-    schedule.turnaroundTime /= processes.size();
+    if(n > 0)
+        schedule.turnaroundTime /= n;
 
     return schedule;
 }

@@ -15,7 +15,10 @@ EMSCRIPTEN_BINDINGS(scheduling) {
         .value("SRTF", SchedulingAlgorithm::SRTF)
         .value("RR", SchedulingAlgorithm::RR)
         .value("EDF", SchedulingAlgorithm::EDF)
-        .value("HPF", SchedulingAlgorithm::HPF);
+        .value("HPF", SchedulingAlgorithm::HPF)
+        .value("CFSS", SchedulingAlgorithm::CFSS)
+        .value("FPET", SchedulingAlgorithm::FPET)
+        .value("MHPET", SchedulingAlgorithm::MHPET);
 
     register_vector<Process>("VectorProcess");
     register_vector<ExecutionBlock>("VectorExecutionBlock");
@@ -51,7 +54,10 @@ EMSCRIPTEN_BINDINGS(scheduling) {
         .field("turnaroundTime", &ExecutionSchedule::turnaroundTime)
         .field("idleTime", &ExecutionSchedule::idleTime)
         .field("contextSwitches", &ExecutionSchedule::contextSwitches)
-        .field("execution", &ExecutionSchedule::execution);
+        .field("execution", &ExecutionSchedule::execution)
+        .field("tardyCnt", &ExecutionSchedule::tardyCnt)
+        .field("earliness", &ExecutionSchedule::earliness)
+        .field("tardiness", &ExecutionSchedule::tardiness);
 
     function("schedule", &schedule);
 }
