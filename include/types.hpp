@@ -15,7 +15,8 @@ enum class SchedulingAlgorithm {
     RR,
     EDF,
     HPF,
-    CFSS
+    CFSS,
+    FPEA
 };
 
 struct Process {
@@ -51,6 +52,8 @@ struct ExecutionSchedule {
     int contextSwitches;
     std::vector<ExecutionBlock> execution;
     std::optional<int> tardyCnt;
+    std::optional<float> earliness;
+    std::optional<float> tardiness;
 };
 
 ExecutionSchedule schedule(const ScheduleConfiguration& config);

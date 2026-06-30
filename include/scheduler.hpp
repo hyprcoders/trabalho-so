@@ -154,3 +154,43 @@ public:
      */
     ExecutionSchedule execute();
 };
+
+class EAScheduler: public AbstractScheduler {
+public:
+    EAScheduler(const ScheduleConfiguration &config);
+protected:
+    std::vector<float> timeTable(const std::vector<int> &order);
+    float getValue(const std::vector<float> &pushs);
+};
+
+class FPEAScheduler: public EAScheduler {
+public:
+    /** @brief Scheduler that minimizes earliness and tardiness for a fixed permutation of processes
+     * 
+     * Earliness is the max(0, deadline - end).
+     * 
+     * Tardiness is the max(0, end - deadline).
+     * 
+     * For a fixed permutation, this scheduler first schedule all jobs as early as possible
+     * and then applies a greedy right to left push until the sum of Earliness and Tardiness
+     * is minimized.
+     */
+    FPEAScheduler(const ScheduleConfiguration &config);
+
+    /**
+     * @brief Returns the execution of the process that minimizes earliness and taridness for a fixed permutation.
+     *
+     * @return ExecutionSchedule containing the ordered execution timeline.
+     */
+    ExecutionSchedule execute();
+};
+
+// class PEAScheduler: public EAScheduler {
+// public:
+//     /** @brief Scheduler using permutational earliness and tardiness algorithm
+//      * 
+//      */
+//     PEAScheduler(const ScheduleConfiguration &config);
+
+//     ExecutionSchedule execute();
+// };

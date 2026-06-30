@@ -28,6 +28,9 @@ ExecutionSchedule schedule(const ScheduleConfiguration& config) {
     case SA::CFSS:
         execution = CFSSimScheduler(config).execute();
         break;
+    case SA::FPEA:
+        execution = FPEAScheduler(config).execute();
+        break;
     default:    
         break;
     }
