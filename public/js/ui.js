@@ -42,6 +42,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const algorithmSelect = document.getElementById("algorithm-select");
     const ganttContainer = document.getElementById("gantt-chart");
     const statistics = document.getElementById("statistics");
+    const processMetrics = document.getElementById("process-metrics");
 
     // Inputs visuais
     const priorityGroup = document.getElementById("priority-group");
@@ -291,7 +292,86 @@ document.addEventListener("DOMContentLoaded", async () => {
             timelineInstance.setGroups(new vis.DataSet([]));
         }
         if (statistics) statistics.innerHTML = "Aguardando execução...";
+        if (processMetrics) processMetrics.innerHTML = "<p>Aguardando execução...</p>";
     });
+
+    function renderProcessMetrics(result, selectedAlgorithm) {
+        if (!processMetrics) return;
+
+        if (!result || processes.length === 0) {
+            processMetrics.innerHTML = "<p>Aguardando execução...</p>";
+            return;
+        }
+
+        const rows = processes.map((process) => {
+            const executionBlocks = [];
+
+            for (let i = 0; i < result.execution.size(); ++i) {
+                const block = result.execution.get(i);
+                if (block.id === process.pid) {
+                    executionBlocks.push(block);
+                }
+            }
+
+            const completionTime = executionBlocks.length > 0
+                ? executionBlocks.reduce((latest, block) => {
+                    const blockEndTime = block.startTime + block.duration;
+                    return blockEndTime > latest ? blockEndTime : latest;
+                }, 0)
+                : null;
+
+            const arrivalTime = Number(process.arrivalTime ?? 0);
+            const turnaround = completionTime === null ? null : completionTime - arrivalTime;
+            const deadline = process.deadline !== null && process.deadline !== undefined ? Number(process.deadline) : null;
+            const isPetAlgorithm = petAlgorithms.includes(selectedAlgorithm);
+            const earliness = completionTime === null || deadline === null ? null : Math.max(0, deadline - completionTime);
+            const tardiness = completionTime === null || deadline === null ? null : Math.max(0, completionTime - deadline);
+
+            let deadlineStatus = "";
+            if (selectedAlgorithm === "EDF") {
+                if (completionTime === null) {
+                    deadlineStatus = '<span class="metric-status">Sem execução</span>';
+                } else if (deadline === null) {
+                    deadlineStatus = '<span class="metric-status">Sem deadline</span>';
+                } else if (completionTime <= deadline) {
+                    deadlineStatus = '<span class="metric-status metric-good">Antes do deadline</span>';
+                } else {
+                    deadlineStatus = '<span class="metric-status metric-warning">Depois do deadline</span>';
+                }
+            }
+
+            const completionLabel = completionTime === null ? "Não executado" : completionTime.toFixed(2);
+            const turnaroundLabel = turnaround === null ? "—" : turnaround.toFixed(2);
+            const earlinessLabel = earliness === null ? "—" : earliness.toFixed(2);
+            const tardinessLabel = tardiness === null ? "—" : tardiness.toFixed(2);
+            const petMetricsHtml = isPetAlgorithm
+                ? `
+                    <div class="process-metric-details">
+                        <span>Earliness: ${earlinessLabel}</span>
+                        <span>Tardiness: ${tardinessLabel}</span>
+                    </div>`
+                : "";
+
+            return `
+                <li class="process-metric-item">
+                    <div class="process-metric-header">
+                        <strong>PID ${process.pid}</strong>
+                        <span class="process-metric-subtitle">Chegada ${arrivalTime}</span>
+                    </div>
+                    <div class="process-metric-details">
+                        <span>Fim: ${completionLabel}</span>
+                        <span>Turnaround: ${turnaroundLabel}</span>
+                    </div>
+                    ${petMetricsHtml}
+                    ${deadlineStatus}
+                </li>`;
+        });
+
+        processMetrics.innerHTML = `
+            <ul class="process-metrics-list">
+                ${rows.join("")}
+            </ul>`;
+    }
 
     // =========================================================================
     // 6. CÁLCULO DA SIMULAÇÃO (WASM) E CRIAÇÃO DO GRÁFICO
@@ -386,6 +466,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     start: block.startTime * SCALE, originalEnd: end, type: 'range', style: style
                 });
             }
+
+            renderProcessMetrics(result, selectedAlgorithm);
 
             const options = {
                 stack: false, showCurrentTime: false, orientation: 'top', selectable: false,

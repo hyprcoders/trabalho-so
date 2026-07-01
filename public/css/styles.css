@@ -409,3 +409,58 @@ input:checked + .slider:before { transform: translateX(16px); }
     font-size: 13px;
     border: 1px solid var(--border-color);
 }
+
+.process-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.process-metrics-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.process-metric-item {
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.process-metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.process-metric-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.process-metric-details {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-dark);
+}
+
+.metric-status {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.metric-good {
+    color: #16a34a;
+}
+
+.metric-warning {
+    color: #dc2626;
+}
