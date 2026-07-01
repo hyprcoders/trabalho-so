@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let maxSimTime = 0;
     let isPlaying = false;
     let playInterval = null;
+    const SCALE = 100;
 
     // ... [MANTENHA TODO O RESTO DO CÓDIGO INTACTO AQUI PARA BAIXO] ...
 
@@ -86,11 +87,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             const li = document.createElement("li");
             const color = processColors[p.pid] || "#4F46E5";
             
+            const extra = p.deadline !== null && p.deadline !== undefined
+                ? `Deadline: ${p.deadline}`
+                : `Prio: ${p.priority}`;
             li.innerHTML = `
                 <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
                     <span>
                         <span style="display:inline-block; width:12px; height:12px; background-color:${color}; border-radius:3px; margin-right:8px; vertical-align: middle;"></span>
-                        PID: ${p.pid} | Chegada: ${p.arrivalTime} | Tempo: ${p.burstTime} | Prio: ${p.priority}
+                        PID: ${p.pid} | Chegada: ${p.arrivalTime} | Tempo: ${p.burstTime} | ${extra}
                     </span>
                     <button class="delete-btn" data-index="${index}" style="background: none; border: none; color: #ef4444; cursor: pointer; font-weight: bold; font-size: 16px;">✕</button>
                 </div>
@@ -109,19 +113,38 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Salva a cor escolhida
         processColors[pid] = colorInput ? colorInput.value.toUpperCase() : "#4F46E5";
 
+        const deadlineValue = btnCheckDeadline.checked && inputDeadline.value !== ""
+            ? Number(inputDeadline.value)
+            : null;
+
+        if (btnCheckDeadline.checked && (deadlineValue === null || Number.isNaN(deadlineValue))) {
+            return alert('Por favor, informe um deadline válido.');
+        }
+
         const newProcess = {
             pid: pid,
             arrivalTime: parseInt(document.getElementById("arrivalTime").value),
             burstTime: parseInt(document.getElementById("burstTime").value),
             priority: parseInt(priorityRange.value) || 0,
-            deadline: btnCheckDeadline.checked ? parseInt(inputDeadline.value) : null
+            deadline: deadlineValue
         };
         
         processes.push(newProcess);
         renderProcesses();
         
+        const keepDeadlineChecked = btnCheckDeadline.checked;
+        const keepDeadlineValue = inputDeadline.value;
+
         pidInput.value = pid + 1; // Incrementa PID
         form.reset();
+
+        if (keepDeadlineChecked) {
+            btnCheckDeadline.checked = true;
+            inputDeadline.disabled = false;
+            inputDeadline.classList.remove("disabled-input");
+            inputDeadline.value = keepDeadlineValue;
+        }
+
         if (priorityValDisplay) priorityValDisplay.textContent = "10";
         if (colorInput) colorInput.value = "#4F46E5"; // Reseta cor
         
@@ -164,14 +187,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         const transformedProcesses = new Module.VectorProcess();
         processes.forEach(p => {
-            const process = {
-                id: p.pid,
-                arrivalTime: p.arrivalTime,
-                executionTime: p.burstTime,
-                priority: p.priority,
-                deadline: p.deadline !== null ? p.deadline : (p.arrivalTime + p.burstTime),
-                pageCount: null
-            };
+                    const process = {
+                    id: p.pid,
+                    arrivalTime: p.arrivalTime,
+                    executionTime: p.burstTime,
+                    priority: p.priority,
+                    deadline: p.deadline !== null && p.deadline !== undefined
+                        ? p.deadline
+                        : (p.arrivalTime + p.burstTime),
+                    pageCount: null
+                };
+            console.log(process)
             transformedProcesses.push_back(process);
         });
 
@@ -179,7 +205,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const quantumInput = document.querySelector('.quantum-input');
         
         const config = {
-            quantum: quantumInput && quantumInput.value ? parseInt(quantumInput.value) : 0,
+            quantum: quantumInput && quantumInput.value ? parseFloat(quantumInput.value) : 0,
             switchingTime: contextCheckbox && contextCheckbox.checked ? 1 : 0,
             seed: 0,
             schedulingAlgorithm: Module.SchedulingAlgorithm[algorithmSelect.value],
@@ -191,6 +217,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         try {
             const result = Module.schedule(config);
 
+            console.log("result=",result)
+
             // Montar Grupos
             const groupsArray = processes.map(p => ({ id: p.pid, content: `PID: ${p.pid}` }));
             groupsArray.push({ id: "system-idle", content: "Ocioso" });
@@ -201,12 +229,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             for (let i = 0; i < result.execution.size(); ++i) {
                 const block = result.execution.get(i);
-                
+                console.log(block)
                 if (block.idleTime > 0) {
-                    const idleStart = block.startTime - block.idleTime;
+                    const idleStart = (block.startTime - block.idleTime) * SCALE;
                     fullItemsArray.push({
                         id: `idle-${i}`, group: 'system-idle', content: 'Idle',
-                        start: idleStart, originalEnd: block.startTime, type: 'range',
+                        start: idleStart, originalEnd: block.startTime * SCALE, type: 'range',
                         style: 'background-color: #e2e8f0; color: #64748b; border-color: #cbd5e1;'
                     });
                 }
@@ -225,12 +253,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                     contentLabel = 'Atraso';
                 }
 
-                const end = block.startTime + block.duration;
+                const end = (block.startTime + block.duration) * SCALE;
                 if (end > maxSimTime) maxSimTime = end;
 
                 fullItemsArray.push({
                     id: `exec-${i}`, group: block.id, content: contentLabel,
-                    start: block.startTime, originalEnd: end, type: 'range', style: style
+                    start: block.startTime * SCALE, originalEnd: end, type: 'range', style: style
                 });
             }
 
@@ -239,10 +267,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 margin: { item: 5, axis: 5 },
                 moment: function (date) { return vis.moment(date).utc(); },
                 format: {
-                    minorLabels: function (date) { return date.valueOf(); },
+                    minorLabels: function (date) { return date.valueOf() / SCALE; },
                     majorLabels: function () { return ''; }
                 },
-                start: 0, end: Math.max(25, maxSimTime + 5)
+                start: 0, end: Math.max(25 * SCALE, maxSimTime + 5 * SCALE)
             };
 
             if (!timelineInstance) {
@@ -291,8 +319,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         playInterval = setInterval(() => {
             const speedVal = speedRange ? parseInt(speedRange.value) : 5;
-            let step = (speedVal / 5) * 0.2;
-            if (step <= 0) step = 0.05;
+            let step = (speedVal / 5) * 0.2 * SCALE;
+            if (step <= 0) step = 0.05 * SCALE;
 
             currentSimTime += step;
             if (currentSimTime >= maxSimTime) {

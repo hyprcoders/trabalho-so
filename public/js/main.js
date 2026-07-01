@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearProcessesBtn = document.getElementById('clear-processes');
     const runSimulationBtn = document.getElementById('run-simulation');
     const algorithmSelect = document.getElementById('algorithm-select');
-    const quantumInput = document.getElementById('quantum');
+    const quantumInput = document.querySelector('.quantum-input');
     const switchingTimeInput = document.getElementById('switchingTime');
     const deadlineGroup = document.getElementById('deadline-group');
     const priorityGroup = document.getElementById('priority-group');
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         processes.forEach(p => {
             const li = document.createElement('li');
-            const extra = p.deadline !== undefined
+            const extra = p.deadline !== undefined && p.deadline !== null
                 ? `Deadline: ${p.deadline}`
                 : `Priority: ${p.priority}`;
             li.textContent = `PID: ${p.pid}, Arrival: ${p.arrivalTime}, Burst: ${p.burstTime}, ${extra}`;
@@ -60,30 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
     algorithmSelect.addEventListener('change', updateProcessFieldVisibility);
     updateProcessFieldVisibility();
 
-    // Event listener for adding a new process
-    processForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const newProcess = {
-            pid: parseInt(document.getElementById('pid').value),
-            arrivalTime: parseInt(document.getElementById('arrivalTime').value),
-            burstTime: parseInt(document.getElementById('burstTime').value)
-        };
-
-        if (algorithmSelect.value === 'EDF' || algorithmSelect.value === 'FPET' || algorithmSelect.value === 'MHPET') {
-            newProcess.deadline = parseInt(document.getElementById('deadline').value);
-        } else if (algorithmSelect.value === 'HPF' || algorithmSelect.value === 'CFSS') {
-            newProcess.priority = parseInt(document.getElementById('priority').value) || 0;
-        } else {
-            newProcess.priority = 0;
-        }
-
-        processes.push(newProcess);
-        renderProcesses();
-        document.getElementById('pid').value = newProcess.pid + 1;
-        processForm.reset();
-        updateProcessFieldVisibility();
-    });
-
     // Event listener for clearing all processes
     clearProcessesBtn.addEventListener('click', () => {
         processes = [];
@@ -102,12 +78,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        alert("ue")
+        return;
         const selectedAlgorithm = algorithmSelect.value;
         const quantum = parseFloat(quantumInput.value) || 0;
         const switchingTime = parseFloat(switchingTimeInput.value) || 0;
 
         console.log(`Running simulation with ${selectedAlgorithm} for processes:`, processes);
-
         // Transform processes to match the C++ Process struct using VectorProcess
         const transformedProcesses = new Module.VectorProcess();
         processes.forEach(p => {
@@ -229,14 +206,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 // ADD THESE PROPERTIES:
                 moment: function (date) {
-                    return vis.moment(date).utc(); 
+                    return vis.moment(date * 1000).utc(); 
                 },
                 format: {
                     minorLabels: function (date, scale, step) {
-                        return date.valueOf(); // Forces numeric output instead of dates/times
+                        return date.valueOf() / 1000;
                     },
                     majorLabels: function (date, scale, step) {
-                        return ''; // Disables the "25 June" header entirely
+                        return '';
                     }
                 },
                 start: 0, // Forces the visualization window to start exactly at 0
