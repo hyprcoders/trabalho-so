@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateProcessFieldVisibility() {
         const algorithm = algorithmSelect.value;
-        const showDeadline = algorithm === 'EDF';
+        const showDeadline = algorithm === 'EDF' || algorithm === 'FPET' || algorithm === 'MHPET';
         const showPriority = algorithm === 'HPF' || algorithm === 'CFSS';
 
         deadlineGroup.style.display = showDeadline ? 'block' : 'none';
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
             burstTime: parseInt(document.getElementById('burstTime').value)
         };
 
-        if (algorithmSelect.value === 'EDF') {
+        if (algorithmSelect.value === 'EDF' || algorithmSelect.value === 'FPET' || algorithmSelect.value === 'MHPET') {
             newProcess.deadline = parseInt(document.getElementById('deadline').value);
         } else if (algorithmSelect.value === 'HPF' || algorithmSelect.value === 'CFSS') {
             newProcess.priority = parseInt(document.getElementById('priority').value) || 0;
@@ -132,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
             temperature: null,
             processes: transformedProcesses
         };
+        alert(quantum)
 
         try {
             // Call the schedule function
