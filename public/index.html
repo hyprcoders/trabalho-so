@@ -62,7 +62,7 @@
                             </div>
                         </div>
 
-                        <div class="input-group">
+                        <div class="input-group" id="priority-group" style="display:none;">
                             <div class="label-row">
                                 <label for="priority">Prioridade</label>
                                 <span>0-100</span>
@@ -71,18 +71,18 @@
                             <span id="priority-val" class="range-val">10</span>
                         </div>
 
-                        <div class="input-group toggle-group">
+                        <div class="input-group toggle-group" id="deadline-toggle-group" style="display:none;">
                             <div>
                                 <label>Adicionar Deadline</label>
                                 <p class="help-text">Afeta algoritmos que usam deadline</p>
                             </div>
                             <label class="switch">
-                                <input type="checkbox" id="check-deadline" unchecked>
+                                <input type="checkbox" id="check-deadline">
                                 <span class="slider round"></span>
                             </label>
                         </div>
 
-                        <div class="input-group">
+                        <div class="input-group" id="deadline-group" style="display:none;">
                             <label>Deadline</label>
                             <input type="number" placeholder="min" disabled class="disabled-input" id="input_deadline">
                         </div>
@@ -142,15 +142,30 @@
 					<input type="range" id="speed-input" min="0" max="10" value="5">
 				</div>
 
-                <div class="topbar-section context-section">
+                <div class="topbar-section context-section" id="switching-group" style="display:none;">
                     <div class="label-row toggle-row">
                         <label>Troca de Contexto</label>
                         <label class="switch">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" id="switching-toggle">
                             <span class="slider round"></span>
                         </label>
                     </div>
-                    <input type="number" placeholder="Quantum" class="quantum-input">
+                    <input type="number" placeholder="Switching time" class="switching-time-input" id="switching-time-input" disabled>
+                </div>
+
+                <div class="topbar-section" id="decay-group" style="display:none;">
+                    <label id="decay-label">Quantum</label>
+                    <input type="number" placeholder="Quantum" id="decay-input">
+                </div>
+
+                <div class="topbar-section" id="temperature-group" style="display:none;">
+                    <label>Temperature</label>
+                    <input type="number" placeholder="Temperature" id="temperature-input">
+                </div>
+
+                <div class="topbar-section" id="seed-group" style="display:none;">
+                    <label>Seed</label>
+                    <input type="number" placeholder="Seed" id="seed-input" value="0">
                 </div>
             </header>
 
@@ -181,7 +196,6 @@
 
     <script type="text/javascript" src="https://unpkg.com/vis-timeline/standalone/umd/vis-timeline-graph2d.min.js"></script>
     <script type="module" src="./wasm/module.js"></script>
-    <!--<script type="module" src="./js/main.js"></script>-->
     <script src="./js/ui.js" type="module"></script>
 </body>
 </html>

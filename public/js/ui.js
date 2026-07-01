@@ -44,21 +44,102 @@ document.addEventListener("DOMContentLoaded", async () => {
     const statistics = document.getElementById("statistics");
 
     // Inputs visuais
+    const priorityGroup = document.getElementById("priority-group");
     const priorityRange = document.getElementById("priority");
     const priorityValDisplay = document.getElementById("priority-val");
     const speedRange = document.getElementById("speed-input");
     const speedValDisplay = document.getElementById("speed-val");
     const colorInput = document.getElementById("process-color");
-    
-    // Deadline Toggle
     const btnCheckDeadline = document.getElementById("check-deadline");
+    const deadlineToggleGroup = document.getElementById("deadline-toggle-group");
+    const deadlineGroup = document.getElementById("deadline-group");
     const inputDeadline = document.getElementById("input_deadline");
+    const switchingGroup = document.getElementById("switching-group");
+    const switchingToggle = document.getElementById("switching-toggle");
+    const switchingTimeInput = document.getElementById("switching-time-input");
+    const decayGroup = document.getElementById("decay-group");
+    const decayLabel = document.getElementById("decay-label");
+    const decayInput = document.getElementById("decay-input");
+    const temperatureGroup = document.getElementById("temperature-group");
+    const temperatureInput = document.getElementById("temperature-input");
+    const seedGroup = document.getElementById("seed-group");
+    const seedInput = document.getElementById("seed-input");
 
-    // =========================================================================
-    // 4. EVENTOS DE UI (Sincronização Visual)
-    // =========================================================================
+    const priorityAlgorithms = ["HPF", "CFSS"];
+    const deadlineAlgorithms = ["EDF", "FPET", "MHPET"];
+    const preemptiveAlgorithms = ["SRTF", "RR", "EDF", "HPF", "CFSS"];
+    const quantumAlgorithms = ["SRTF", "RR", "EDF", "HPF", "CFSS", "MHPET"];
+    const petAlgorithms = ["FPET", "MHPET"];
+    const mhpetAlgorithm = "MHPET";
+
+    function updateFieldVisibility() {
+        const algorithm = algorithmSelect.value;
+        const showPriority = priorityAlgorithms.includes(algorithm);
+        const showDeadline = deadlineAlgorithms.includes(algorithm);
+        const showSwitching = preemptiveAlgorithms.includes(algorithm);
+        const showDecay = quantumAlgorithms.includes(algorithm);
+        const showTemperature = algorithm === mhpetAlgorithm;
+        const showSeed = algorithm === mhpetAlgorithm;
+
+        if (priorityGroup) priorityGroup.style.display = showPriority ? "" : "none";
+        if (deadlineToggleGroup) deadlineToggleGroup.style.display = showDeadline ? "" : "none";
+        if (deadlineGroup) deadlineGroup.style.display = showDeadline && btnCheckDeadline?.checked ? "" : "none";
+        if (switchingGroup) switchingGroup.style.display = showSwitching ? "" : "none";
+        if (decayGroup) decayGroup.style.display = showDecay ? "" : "none";
+        if (temperatureGroup) temperatureGroup.style.display = showTemperature ? "" : "none";
+        if (seedGroup) seedGroup.style.display = showSeed ? "" : "none";
+
+        if (decayLabel) {
+            decayLabel.textContent = algorithm === mhpetAlgorithm ? "Decay" : "Quantum";
+            if (decayInput) decayInput.placeholder = algorithm === mhpetAlgorithm ? "Decay" : "Quantum";
+        }
+
+        if (!showDeadline && btnCheckDeadline) {
+            btnCheckDeadline.checked = false;
+        }
+
+        if (!showPriority && priorityRange) {
+            priorityRange.value = "10";
+            if (priorityValDisplay) priorityValDisplay.textContent = "10";
+        }
+
+        if (!showSwitching && switchingToggle && switchingTimeInput) {
+            switchingToggle.checked = false;
+            switchingTimeInput.disabled = true;
+            switchingTimeInput.classList.add("disabled-input");
+            switchingTimeInput.value = "";
+        }
+
+        if (!showDecay && decayInput) {
+            decayInput.value = "";
+        }
+
+        if (!showTemperature && temperatureInput) {
+            temperatureInput.value = "";
+        }
+
+        if (!showSeed && seedInput) {
+            seedInput.value = "0";
+        }
+
+        if (btnCheckDeadline) {
+            inputDeadline.disabled = !btnCheckDeadline.checked;
+            if (!btnCheckDeadline.checked) {
+                inputDeadline.classList.add("disabled-input");
+                inputDeadline.value = "";
+            }
+        }
+    }
+
+    function updateDeadlineVisibility() {
+        if (deadlineGroup) {
+            deadlineGroup.style.display = btnCheckDeadline?.checked ? "" : "none";
+        }
+    }
+
     priorityRange?.addEventListener("input", (e) => priorityValDisplay.textContent = e.target.value);
     speedRange?.addEventListener("input", (e) => speedValDisplay.textContent = e.target.value);
+    algorithmSelect?.addEventListener("change", updateFieldVisibility);
 
     btnCheckDeadline?.addEventListener("change", (e) => {
         if (e.target.checked) {
@@ -69,7 +150,18 @@ document.addEventListener("DOMContentLoaded", async () => {
             inputDeadline.classList.add("disabled-input");
             inputDeadline.value = "";
         }
+        updateDeadlineVisibility();
     });
+
+    switchingToggle?.addEventListener("change", (e) => {
+        if (switchingTimeInput) {
+            switchingTimeInput.disabled = !e.target.checked;
+            switchingTimeInput.classList.toggle("disabled-input", !e.target.checked);
+            if (!e.target.checked) switchingTimeInput.value = "";
+        }
+    });
+
+    if (algorithmSelect) updateFieldVisibility();
 
     // =========================================================================
     // 5. GERENCIAMENTO DE PROCESSOS (CRUD)
@@ -103,6 +195,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
+    function getNextPid() {
+        const existingPids = new Set(processes.map((p) => p.pid));
+        let nextPid = 1;
+        while (existingPids.has(nextPid)) {
+            nextPid += 1;
+        }
+        return nextPid;
+    }
+
     // Adicionar Processo
     form?.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -110,6 +211,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         const pidInput = document.getElementById("pid");
         const pid = parseInt(pidInput.value);
         
+        if (processes.some((p) => p.pid === pid)) {
+            return alert(`PID ${pid} já existe. Escolha um PID diferente.`);
+        }
+
         // Salva a cor escolhida
         processColors[pid] = colorInput ? colorInput.value.toUpperCase() : "#4F46E5";
 
@@ -135,7 +240,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const keepDeadlineChecked = btnCheckDeadline.checked;
         const keepDeadlineValue = inputDeadline.value;
 
-        pidInput.value = pid + 1; // Incrementa PID
+        pidInput.value = getNextPid();
         form.reset();
 
         if (keepDeadlineChecked) {
@@ -201,23 +306,27 @@ document.addEventListener("DOMContentLoaded", async () => {
             transformedProcesses.push_back(process);
         });
 
-        const contextCheckbox = document.querySelector('.context-section .switch input[type="checkbox"]');
-        const quantumInput = document.querySelector('.quantum-input');
-        
+        const switchingTime = switchingToggle && switchingToggle.checked && switchingTimeInput && switchingTimeInput.value
+            ? parseFloat(switchingTimeInput.value)
+            : 0;
+        const decayValue = decayInput && decayInput.value ? parseFloat(decayInput.value) : 0;
+        const temperatureValue = temperatureInput && temperatureInput.value ? Number(temperatureInput.value) : null;
+        const seedValue = seedInput && seedInput.value ? parseInt(seedInput.value) : 0;
+
         const config = {
-            quantum: quantumInput && quantumInput.value ? parseFloat(quantumInput.value) : 0,
-            switchingTime: contextCheckbox && contextCheckbox.checked ? 1 : 0,
-            seed: 0,
+            quantum: decayValue,
+            switchingTime: switchingTime,
+            seed: seedValue,
             schedulingAlgorithm: Module.SchedulingAlgorithm[algorithmSelect.value],
             diskCost: null,
-            temperature: null,
+            temperature: temperatureValue !== null ? temperatureValue : null,
             processes: transformedProcesses
         };
 
         try {
             const result = Module.schedule(config);
 
-            console.log("result=",result)
+            console.log("result=", result)
 
             // Montar Grupos
             const groupsArray = processes.map(p => ({ id: p.pid, content: `PID: ${p.pid}` }));
@@ -281,10 +390,28 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             if (statistics) {
-                statistics.innerHTML = `
+                const isPetScheduler = petAlgorithms.includes(algorithmSelect.value);
+                let statsHtml = `
+                    <p><strong>Idle time:</strong> ${result.idleTime}</p>`;
+
+                if (!isPetScheduler) {
+                    statsHtml = `
                     <p><strong>Turnaround time:</strong> ${result.turnaroundTime.toFixed(2)}</p>
                     <p><strong>Idle time:</strong> ${result.idleTime}</p>
                     <p><strong>Context switches:</strong> ${result.contextSwitches}</p>`;
+                }
+
+                if (result.tardyCnt !== undefined && result.tardyCnt !== null) {
+                    statsHtml += `\n                    <p><strong>Late count:</strong> ${result.tardyCnt}</p>`;
+                }
+                if (result.earliness !== undefined && result.earliness !== null) {
+                    statsHtml += `\n                    <p><strong>Earliness:</strong> ${result.earliness.toFixed(2)}</p>`;
+                }
+                if (result.tardiness !== undefined && result.tardiness !== null) {
+                    statsHtml += `\n                    <p><strong>Tardiness:</strong> ${result.tardiness.toFixed(2)}</p>`;
+                }
+
+                statistics.innerHTML = statsHtml;
             }
 
             // Inicia o player automaticamente do zero
