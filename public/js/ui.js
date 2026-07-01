@@ -91,7 +91,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (decayLabel) {
             decayLabel.textContent = algorithm === mhpetAlgorithm ? "Decay" : "Quantum";
-            if (decayInput) decayInput.placeholder = algorithm === mhpetAlgorithm ? "Decay" : "Quantum";
+            if (decayInput) {
+                decayInput.placeholder = algorithm === mhpetAlgorithm ? "Decay" : "Quantum";
+                if (algorithm === mhpetAlgorithm) {
+                    decayInput.max = "0.999";
+                    decayInput.min = "0";
+                    decayInput.step = "0.001";
+                } else {
+                    decayInput.removeAttribute("max");
+                    decayInput.removeAttribute("min");
+                    decayInput.removeAttribute("step");
+                }
+            }
         }
 
         if (!showDeadline && btnCheckDeadline) {
@@ -309,15 +320,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         const switchingTime = switchingToggle && switchingToggle.checked && switchingTimeInput && switchingTimeInput.value
             ? parseFloat(switchingTimeInput.value)
             : 0;
-        const decayValue = decayInput && decayInput.value ? parseFloat(decayInput.value) : 0;
+        let decayValue = decayInput && decayInput.value ? parseFloat(decayInput.value) : 0;
         const temperatureValue = temperatureInput && temperatureInput.value ? Number(temperatureInput.value) : null;
         const seedValue = seedInput && seedInput.value ? parseInt(seedInput.value) : 0;
+        const selectedAlgorithm = algorithmSelect.value;
+
+        if (selectedAlgorithm === mhpetAlgorithm && decayValue >= 1) {
+            return alert('Para MHPET, o valor de decay deve ser menor que 1.');
+        }
 
         const config = {
             quantum: decayValue,
             switchingTime: switchingTime,
             seed: seedValue,
-            schedulingAlgorithm: Module.SchedulingAlgorithm[algorithmSelect.value],
+            schedulingAlgorithm: Module.SchedulingAlgorithm[selectedAlgorithm],
             diskCost: null,
             temperature: temperatureValue !== null ? temperatureValue : null,
             processes: transformedProcesses

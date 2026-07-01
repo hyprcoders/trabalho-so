@@ -36,15 +36,7 @@
 						<button id="btn-delete"></button>
                     </div>
                     
-                    <form id="process-form">
-                        <div class="input-group">
-							<label>Cor</label>
-							<div class="color-input-wrapper" style="position: relative;">
-								<input type="color" id="process-color" value="#4f46e5" style="position: absolute; left: 4px; top: 4px; width: 24px; height: 24px; opacity: 0; cursor: pointer;">
-								<div class="color-swatch" id="color-swatch" style="background-color: #4f46e5;"></div>
-								<input type="text" id="color-text" value="#4F46E5" readonly>
-							</div>
-						</div>
+                    <form id="process-form">    
 
                         <div class="input-group">
                             <label for="pid">Identificador</label>
@@ -155,7 +147,7 @@
 
                 <div class="topbar-section" id="decay-group" style="display:none;">
                     <label id="decay-label">Quantum</label>
-                    <input type="number" placeholder="Quantum" id="decay-input">
+                    <input type="number" placeholder="Quantum" id="decay-input" max="0.999">
                 </div>
 
                 <div class="topbar-section" id="temperature-group" style="display:none;">
