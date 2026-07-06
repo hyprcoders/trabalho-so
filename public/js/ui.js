@@ -1102,6 +1102,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (infoAlert) infoAlert.style.display = "none";
     });
 
+    // Toggle RAM simulator config section collapse manually
+    const btnToggleRamConfig = document.getElementById("btn-toggle-ram-config");
+    const ramConfigSection = document.getElementById("ram-config-section");
+    const ramCollapseIcon = document.getElementById("ram-collapse-icon");
+
+    if (btnToggleRamConfig && ramConfigSection && ramCollapseIcon) {
+        btnToggleRamConfig.addEventListener("click", () => {
+            ramConfigSection.classList.toggle("collapsed");
+            ramCollapseIcon.classList.toggle("ram-collapsed-icon-rotated");
+        });
+    }
+
     // Auto collapse sidebar if screen size is too small (< 900px)
     function handleResize() {
         const sidebar = document.getElementById("sidebar");

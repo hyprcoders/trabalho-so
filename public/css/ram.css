@@ -11,6 +11,22 @@
     margin-bottom: 0;
 }
 
+#ram-config-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+#ram-config-section.collapsed {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+#ram-config-section.collapsed .ram-config-grid {
+    display: none !important;
+}
+
 .ram-config-title {
     font-size: 13px;
     font-weight: 700;
@@ -18,15 +34,19 @@
     margin-bottom: 14px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    justify-content: space-between;
+    width: 100%;
 }
 
 .ram-config-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 10px 16px;
+    transition: all 0.3s ease;
+}
+
+.ram-collapsed-icon-rotated {
+    transform: rotate(-90deg);
 }
 
 .ram-config-grid .input-group {
@@ -58,9 +78,9 @@
     border-color: var(--accent);
 }
 
-/* ---- Process Card RAM Fields ---- */
 .ram-fields-row {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     margin-top: 8px;
     padding-top: 8px;
@@ -68,7 +88,7 @@
 }
 
 .ram-fields-row .input-group {
-    flex: 1;
+    flex: 1 1 120px;
     margin-bottom: 0;
 }
 

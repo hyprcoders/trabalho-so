@@ -39,6 +39,7 @@ body {
     flex-direction: column;
     overflow-y: hidden;
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    container-type: inline-size;
 }
 
 .sidebar.collapsed {
@@ -796,4 +797,41 @@ input:checked + .slider:before { transform: translateX(16px); }
 
 .modal-body {
     padding: 20px;
+}
+
+@container (max-width: 279px) {
+    /* Collapse the RAM simulation fields and remove border/padding/margin */
+    #ram-config-section {
+        border-top: none !important;
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+    
+    .ram-config-grid {
+        display: none !important;
+    }
+    
+    /* Stack sidebar action buttons */
+    .sidebar-actions {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        margin-bottom: 12px !important;
+    }
+    
+    .sidebar-actions button {
+        width: 100% !important;
+        margin-bottom: 0 !important;
+    }
+    
+    /* Stack form action buttons */
+    .form-actions {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+    
+    .form-actions button {
+        width: 100% !important;
+    }
 }

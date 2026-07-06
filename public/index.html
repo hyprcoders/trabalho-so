@@ -156,11 +156,15 @@
                     <input type="number" placeholder="Seed" id="seed-input" value="0">
                 </div>
 
-                <!-- RAM Simulator Config Section -->
-                <div id="ram-config-section" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
-                    <div class="ram-config-title">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                        Simulador de RAM
+                <div id="ram-config-section">
+                    <div class="ram-config-title" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none;" id="btn-toggle-ram-config">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                            <span>Simulador de RAM</span>
+                        </div>
+                        <button id="ram-collapse-btn" class="icon-button" style="background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;" title="Recolher Simulador de RAM">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="ram-collapse-icon" style="transition: transform 0.2s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
                     </div>
                     <div class="ram-config-grid">
                         <div class="input-group">
@@ -231,8 +235,8 @@
                 <div class="topbar-right" style="display: flex; align-items: center; gap: 16px;">
                     <!-- View Tabs -->
                     <div class="ram-tab-controls" id="view-tabs">
-                        <button class="ram-tab-btn active" id="tab-scheduler" data-view="scheduler">&#128197; Escalonador</button>
-                        <button class="ram-tab-btn" id="tab-ram" data-view="ram">&#128190; RAM</button>
+                        <button class="ram-tab-btn active" id="tab-scheduler" data-view="scheduler">Escalonador</button>
+                        <button class="ram-tab-btn" id="tab-ram" data-view="ram">RAM</button>
                     </div>
                     <div class="topbar-section speed-section">
                         <div class="label-row">
