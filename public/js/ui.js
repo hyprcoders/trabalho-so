@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const sidebarFooter = document.getElementById("sidebar-footer");
         if (sidebarFooter) {
-            sidebarFooter.style.display = (showSwitching || showDecay) ? "block" : "none";
+            sidebarFooter.style.display = (showSwitching || showDecay || showTemperature || showSeed) ? "block" : "none";
         }
     }
 

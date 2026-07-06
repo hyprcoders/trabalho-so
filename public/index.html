@@ -124,9 +124,19 @@
                     <input type="number" placeholder="Tempo de troca" class="disabled-input" id="switching-time-input" disabled>
                 </div>
 
-                <div class="input-group" id="decay-group" style="display:none;">
+                <div class="input-group" id="decay-group" style="display:none; margin-bottom: 16px;">
                     <label id="decay-label">Quantum</label>
                     <input type="number" placeholder="Quantum" id="decay-input" max="0.999">
+                </div>
+
+                <div class="input-group" id="temperature-group" style="display:none; margin-bottom: 16px;">
+                    <label>Temperature</label>
+                    <input type="number" placeholder="Temperature" id="temperature-input">
+                </div>
+
+                <div class="input-group" id="seed-group" style="display:none;">
+                    <label>Seed</label>
+                    <input type="number" placeholder="Seed" id="seed-input" value="0">
                 </div>
             </div>
             <div class="sidebar-resizer" id="sidebar-resizer"></div>
@@ -171,16 +181,6 @@
                             <span>0-10</span>
                         </div>
                         <input type="range" id="speed-input" min="0" max="10" value="5">
-                    </div>
-
-                    <div class="topbar-section" id="temperature-group" style="display:none;">
-                        <label>Temperature</label>
-                        <input type="number" placeholder="Temperature" id="temperature-input">
-                    </div>
-
-                    <div class="topbar-section" id="seed-group" style="display:none;">
-                        <label>Seed</label>
-                        <input type="number" placeholder="Seed" id="seed-input" value="0">
                     </div>
                 </div>
             </header>
