@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Process Scheduler Simulator</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/ram.css">
     <link href="https://unpkg.com/vis-timeline/standalone/umd/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -66,6 +67,18 @@
                             <div class="input-group">
                                 <label for="burstTime">Tempo</label>
                                 <input type="number" id="burstTime" placeholder="min" value="5" required>
+                            </div>
+                        </div>
+
+                        <!-- RAM Simulator Fields -->
+                        <div class="ram-fields-row">
+                            <div class="input-group">
+                                <label for="pageCount"><span class="ram-badge">&#128190; RAM</span> Nº de Páginas</label>
+                                <input type="number" id="pageCount" placeholder="ex: 8" value="8" min="1" max="64">
+                            </div>
+                            <div class="input-group">
+                                <label for="memorySize">Tam. Memória (KB)</label>
+                                <input type="number" id="memorySize" placeholder="ex: 32" value="32" min="1" max="512">
                             </div>
                         </div>
 
@@ -142,6 +155,43 @@
                     <label>Seed</label>
                     <input type="number" placeholder="Seed" id="seed-input" value="0">
                 </div>
+
+                <!-- RAM Simulator Config Section -->
+                <div id="ram-config-section" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                    <div class="ram-config-title">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                        Simulador de RAM
+                    </div>
+                    <div class="ram-config-grid">
+                        <div class="input-group">
+                            <label for="ram-total-memory">Memória Total (KB)</label>
+                            <input type="number" id="ram-total-memory" value="256" min="32" max="4096" placeholder="256">
+                        </div>
+                        <div class="input-group">
+                            <label for="ram-frame-count">Quadros (Frames)</label>
+                            <input type="number" id="ram-frame-count" value="4" min="1" max="32" placeholder="4">
+                        </div>
+                        <div class="input-group">
+                            <label for="ram-page-algo">Substituição de Página</label>
+                            <select id="ram-page-algo" class="custom-select" style="font-size: 12px; padding: 6px 8px;">
+                                <option value="FIFO">FIFO</option>
+                                <option value="LRU" selected>LRU</option>
+                                <option value="OPT">Ótimo (OPT)</option>
+                                <option value="Clock">Clock (2ª Chance)</option>
+                                <option value="NRU">NRU</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="ram-alloc-strategy">Alocação</label>
+                            <select id="ram-alloc-strategy" class="custom-select" style="font-size: 12px; padding: 6px 8px;">
+                                <option value="firstFit" selected>First Fit</option>
+                                <option value="bestFit">Best Fit</option>
+                                <option value="worstFit">Worst Fit</option>
+                                <option value="nextFit">Next Fit</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="sidebar-resizer" id="sidebar-resizer"></div>
         </aside>
@@ -178,7 +228,12 @@
                     </div>
                 </div>
 
-                <div class="topbar-right">
+                <div class="topbar-right" style="display: flex; align-items: center; gap: 16px;">
+                    <!-- View Tabs -->
+                    <div class="ram-tab-controls" id="view-tabs">
+                        <button class="ram-tab-btn active" id="tab-scheduler" data-view="scheduler">&#128197; Escalonador</button>
+                        <button class="ram-tab-btn" id="tab-ram" data-view="ram">&#128190; RAM</button>
+                    </div>
                     <div class="topbar-section speed-section">
                         <div class="label-row">
                             <label>Velocidade: <span id="speed-val">5</span></label>
@@ -189,7 +244,8 @@
                 </div>
             </header>
 
-            <div class="workspace-grid">
+            <!-- SCHEDULER VIEW -->
+            <div class="workspace-grid" id="view-scheduler">
                 <section class="panel gantt-panel">
                     <h2>Gráfico de Execução</h2>
                     <div class="panel-content" style="display: flex; flex-direction: column; justify-content: space-between;">
@@ -233,12 +289,28 @@
                     </div>
                 </section>
             </div>
+
+            <!-- RAM SIMULATOR VIEW -->
+            <div class="ram-view-panel" id="view-ram">
+                <!-- RAM content rendered by ram-ui.js -->
+                <div class="ram-content" id="ram-content">
+                    <div class="ram-empty-state">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="2" y="3" width="20" height="14" rx="2"/>
+                            <line x1="8" y1="21" x2="16" y2="21"/>
+                            <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                        <p>Execute a simulação do escalonador primeiro,<br>depois acesse a aba <strong>RAM</strong> para visualizar a gestão de memória.</p>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
     <script type="text/javascript" src="https://unpkg.com/vis-timeline/standalone/umd/vis-timeline-graph2d.min.js"></script>
     <script type="module" src="./wasm/module.js"></script>
     <script src="./js/ui.js" type="module"></script>
+    <script src="./js/ram-ui.js" type="module"></script>
     <div id="json-import-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">

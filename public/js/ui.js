@@ -160,7 +160,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const sidebarFooter = document.getElementById("sidebar-footer");
         if (sidebarFooter) {
-            sidebarFooter.style.display = (showSwitching || showDecay || showTemperature || showSeed) ? "block" : "none";
+            // Always show sidebar footer (RAM config is always visible)
+            sidebarFooter.style.display = "block";
         }
     }
 
@@ -354,6 +355,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         const burstInput = document.getElementById("burstTime");
         if (burstInput) burstInput.value = p.burstTime;
 
+        const pageCountInput = document.getElementById("pageCount");
+        if (pageCountInput) pageCountInput.value = p.pageCount || 8;
+
+        const memorySizeInput = document.getElementById("memorySize");
+        if (memorySizeInput) memorySizeInput.value = p.memorySize || 32;
+
         if (colorInput) {
             colorInput.value = processColors[p.pid] || "#4F46E5";
         }
@@ -448,7 +455,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             arrivalTime: parseInt(document.getElementById("arrivalTime").value),
             burstTime: parseInt(document.getElementById("burstTime").value),
             priority: parseInt(priorityRange.value) || 0,
-            deadline: deadlineValue
+            deadline: deadlineValue,
+            pageCount: parseInt(document.getElementById("pageCount")?.value) || 8,
+            memorySize: parseInt(document.getElementById("memorySize")?.value) || 32,
         };
         
         if (editingIndex !== null) {
@@ -703,6 +712,30 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             renderProcessMetrics(result, selectedAlgorithm);
+
+            // ----------------------------------------------------------------
+            // Share simulation data with the RAM module
+            // ----------------------------------------------------------------
+            const executionBlocksForRam = [];
+            for (let i = 0; i < result.execution.size(); ++i) {
+                const block = result.execution.get(i);
+                executionBlocksForRam.push({
+                    id: block.id,
+                    startTime: block.startTime,
+                    duration: block.duration,
+                    type: block.type === Module.ExecutionType.Executing ? 'Executing' :
+                           block.type === Module.ExecutionType.Switching ? 'Switching' : 'Tardy',
+                    pid: block.id,
+                });
+            }
+            window.__lastSimResult = {
+                processes: JSON.parse(JSON.stringify(processes)),
+                processColors: { ...processColors },
+                executionBlocks: executionBlocksForRam,
+                algorithm: selectedAlgorithm,
+            };
+            window.dispatchEvent(new CustomEvent('ram-simulation-ready'));
+            // ----------------------------------------------------------------
 
             const options = {
                 stack: false, showCurrentTime: false, orientation: 'top', selectable: false,
@@ -1148,7 +1181,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                     arrivalTime: p.arrivalTime,
                     burstTime: p.burstTime,
                     priority: p.priority || 0,
-                    deadline: p.deadline !== undefined ? p.deadline : null
+                    deadline: p.deadline !== undefined ? p.deadline : null,
+                    pageCount: p.pageCount !== undefined ? p.pageCount : 8,
+                    memorySize: p.memorySize !== undefined ? p.memorySize : 32,
                 }));
                 processColors = {};
                 data.processes.forEach(p => {

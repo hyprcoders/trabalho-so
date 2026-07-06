@@ -681,6 +681,44 @@ input:checked + .slider:before { transform: translateX(16px); }
     color: #dc2626;
 }
 
+/* ---- RAM View Panel fills the workspace like workspace-grid ---- */
+#view-scheduler {
+    flex: 1;
+    overflow: hidden;
+}
+
+.ram-view-panel {
+    flex: 1;
+    overflow: hidden;
+    display: none;
+}
+
+.ram-view-panel.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.ram-content {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+.ram-content::-webkit-scrollbar { width: 6px; }
+.ram-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+
+/* Play button styles */
+.play-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+}
+
+.play-btn:hover {
+    background: var(--primary-hover);
+}
+
 /* Bento Box Grid and Responsive Layouts (< 900px) */
 @media (max-width: 900px) {
     .workspace-grid {
