@@ -43,6 +43,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     const formContainer = document.getElementById("form-container");
     const btnCancelForm = document.getElementById("btn-cancel-form");
     const runBtn = document.getElementById("run-simulation");
+    
+    // Control Bar elements
+    const scrubber = document.getElementById("timeline-scrubber");
+    const scrubStartLbl = document.getElementById("lbl-scrub-start");
+    const scrubEndLbl = document.getElementById("lbl-scrub-end");
+    const zoomInBtn = document.getElementById("btn-zoom-in");
+    const zoomOutBtn = document.getElementById("btn-zoom-out");
     const algorithmSelect = document.getElementById("algorithm-select");
     const ganttContainer = document.getElementById("gantt-chart");
     const statistics = document.getElementById("statistics");
@@ -290,6 +297,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         
         if (priorityValDisplay) priorityValDisplay.textContent = "10";
+        
+        if (scrubber) scrubber.value = 0;
+        if (scrubStartLbl) scrubStartLbl.textContent = "0.0";
+        if (scrubEndLbl) scrubEndLbl.textContent = "0.0";
         
         const formTitle = document.getElementById("form-title");
         if (formTitle) formTitle.textContent = "Novo Processo";
@@ -646,7 +657,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     minorLabels: function (date) { return date.valueOf() / SCALE; },
                     majorLabels: function () { return ''; }
                 },
-                start: 0, end: Math.max(25 * SCALE, maxSimTime + 5 * SCALE)
+                start: 0, end: Math.max(25 * SCALE, maxSimTime + 5 * SCALE),
+                min: 0
             };
 
             if (!timelineInstance) {
@@ -681,6 +693,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 statistics.innerHTML = statsHtml;
             }
 
+            if (scrubEndLbl) {
+                scrubEndLbl.textContent = (maxSimTime / SCALE).toFixed(1);
+            }
+
             // Inicia o player automaticamente do zero
             currentSimTime = 0;
             playSimulation();
@@ -705,11 +721,43 @@ document.addEventListener("DOMContentLoaded", async () => {
         }).filter(i => i !== null);
         
         timelineInstance.setItems(new vis.DataSet(visibleItems));
+
+        if (scrubber) {
+            scrubber.value = maxSimTime > 0 ? (currentSimTime / maxSimTime) * 100 : 0;
+        }
+        if (scrubStartLbl) {
+            scrubStartLbl.textContent = (currentSimTime / SCALE).toFixed(1);
+        }
+        updatePlayPauseButtonState();
+    }
+
+    function updatePlayPauseButtonState() {
+        const playIcon = document.getElementById("play-icon");
+        const pauseIcon = document.getElementById("pause-icon");
+        const repeatIcon = document.getElementById("repeat-icon");
+        if (isPlaying) {
+            if (playIcon) playIcon.style.display = "none";
+            if (pauseIcon) pauseIcon.style.display = "block";
+            if (repeatIcon) repeatIcon.style.display = "none";
+            if (runBtn) runBtn.title = "Pausar";
+        } else {
+            if (playIcon) {
+                playIcon.style.display = (currentSimTime >= maxSimTime && maxSimTime > 0) ? "none" : "block";
+            }
+            if (pauseIcon) pauseIcon.style.display = "none";
+            if (repeatIcon) {
+                repeatIcon.style.display = (currentSimTime >= maxSimTime && maxSimTime > 0) ? "block" : "none";
+            }
+            if (runBtn) {
+                runBtn.title = (currentSimTime >= maxSimTime && maxSimTime > 0) ? "Repetir" : "Play";
+            }
+        }
     }
 
     function playSimulation() {
         if (isPlaying || fullItemsArray.length === 0) return;
         isPlaying = true;
+        updatePlayPauseButtonState();
 
         playInterval = setInterval(() => {
             const speedVal = speedRange ? parseInt(speedRange.value) : 5;
@@ -728,31 +776,46 @@ document.addEventListener("DOMContentLoaded", async () => {
     function pauseSimulation() {
         isPlaying = false;
         clearInterval(playInterval);
+        updatePlayPauseButtonState();
     }
 
     // Botões do Player
-    document.getElementById('btn-pause')?.addEventListener('click', pauseSimulation);
-    
-    document.getElementById('btn-forward')?.addEventListener('click', () => {
-        pauseSimulation();
-        currentSimTime = Math.min(maxSimTime, Math.ceil(currentSimTime) + 1);
-        renderSimulationFrame();
-    });
-
-    document.getElementById('btn-rewind')?.addEventListener('click', () => {
-        pauseSimulation();
-        currentSimTime = Math.max(0, Math.floor(currentSimTime) - 1);
-        renderSimulationFrame();
-    });
-
     runBtn?.addEventListener('click', () => {
         if (processes.length === 0) return alert('Adicione processos primeiro!');
-        // Se estiver no meio do gráfico e não estiver tocando, retoma (despausa).
-        if (currentSimTime > 0 && currentSimTime < maxSimTime && fullItemsArray.length > 0 && !isPlaying) {
-            playSimulation();    
+        
+        if (isPlaying) {
+            pauseSimulation();
         } else {
-            // Caso contrário, calcula tudo do zero
-            calculateSimulation();
+            if (currentSimTime >= maxSimTime && maxSimTime > 0) {
+                currentSimTime = 0;
+                renderSimulationFrame();
+                playSimulation();
+            } else if (currentSimTime > 0 && currentSimTime < maxSimTime && fullItemsArray.length > 0) {
+                playSimulation();    
+            } else {
+                calculateSimulation();
+            }
+        }
+    });
+
+    // Scrubber drag seeking
+    scrubber?.addEventListener("input", (e) => {
+        pauseSimulation();
+        const pct = parseFloat(e.target.value) / 100;
+        currentSimTime = pct * maxSimTime;
+        renderSimulationFrame();
+    });
+
+    // Zoom buttons
+    zoomInBtn?.addEventListener("click", () => {
+        if (timelineInstance) {
+            timelineInstance.zoomIn(0.2);
+        }
+    });
+
+    zoomOutBtn?.addEventListener("click", () => {
+        if (timelineInstance) {
+            timelineInstance.zoomOut(0.2);
         }
     });
 

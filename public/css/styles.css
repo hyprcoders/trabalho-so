@@ -514,8 +514,70 @@ input:checked + .slider:before { transform: translateX(16px); }
 .bottom-right-panel { grid-row: 2 / 3; grid-column: 2 / 3; }
 
 /* Vis Timeline Overrides */
-.vis-timeline { border: none !important; }
-.vis-item { border-radius: 4px; font-size: 12px; }
+.vis-timeline {
+    border: none !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    background-color: var(--bg-panel) !important;
+}
+
+.vis-panel {
+    border-color: var(--border-color) !important;
+}
+
+.vis-panel.vis-center, .vis-panel.vis-left, .vis-panel.vis-right, .vis-panel.vis-top, .vis-panel.vis-bottom {
+    border-color: var(--border-color) !important;
+}
+
+.vis-time-axis .vis-text {
+    font-family: inherit !important;
+    color: var(--text-muted) !important;
+    font-size: 11px !important;
+    padding: 4px 0 !important;
+}
+
+.vis-time-axis .vis-grid.vis-vertical {
+    border-color: var(--border-color) !important;
+    opacity: 0.5 !important;
+}
+
+.vis-panel .vis-grid.vis-horizontal {
+    border-color: var(--border-color) !important;
+    opacity: 0.5 !important;
+}
+
+.vis-label {
+    color: var(--text-dark) !important;
+    font-weight: 500 !important;
+    font-size: 13px !important;
+    padding-left: 12px !important;
+    display: flex;
+    align-items: center;
+}
+
+.vis-labelset .vis-label {
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.vis-foreground .vis-group {
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.vis-item {
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid transparent !important;
+    height: 30px !important;
+}
+
+.vis-item.vis-range {
+    line-height: 28px !important;
+}
+
+.vis-item-content {
+    padding: 0 8px !important;
+}
 
 #statistics p {
     background: #f1f5f9;

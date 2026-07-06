@@ -151,20 +151,10 @@
 
                 <div class="topbar-center">
                     <div class="player-controls">
-                        <button id="btn-rewind" class="icon-btn-round" title="Retroceder">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
-                        </button>
-                        
-                        <button id="btn-pause" class="icon-btn-round" title="Pausar">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                        </button>
-                        
-                        <button id="run-simulation" class="icon-btn-round play-btn" title="Play">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                        </button>
-                        
-                        <button id="btn-forward" class="icon-btn-round" title="Avançar">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+                        <button id="run-simulation" class="icon-btn-round play-btn" title="Play" style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <svg id="play-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            <svg id="pause-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                            <svg id="repeat-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><path d="M17 1l4 4-4 4"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23l-4-4 4-4"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
                         </button>
                     </div>
                 </div>
@@ -193,8 +183,28 @@
             <div class="workspace-grid">
                 <section class="panel gantt-panel">
                     <h2>Gráfico de Execução</h2>
-                    <div class="panel-content">
-                        <div id="gantt-chart"></div>
+                    <div class="panel-content" style="display: flex; flex-direction: column; justify-content: space-between;">
+                        <div id="gantt-chart" style="flex: 1;"></div>
+                        
+                        <!-- Control Bar -->
+                        <div class="gantt-control-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+                            <!-- Scrubber / Range slider -->
+                            <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                                <span style="font-size: 12px; color: var(--text-muted); min-width: 35px;" id="lbl-scrub-start">0.0</span>
+                                <input type="range" id="timeline-scrubber" min="0" max="100" value="0" style="flex: 1; cursor: pointer; height: 6px; -webkit-appearance: none; background: #cbd5e1; border-radius: 3px; outline: none;">
+                                <span style="font-size: 12px; color: var(--text-muted); min-width: 35px;" id="lbl-scrub-end">0.0</span>
+                            </div>
+                            
+                            <!-- Zoom controls -->
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button id="btn-zoom-out" class="icon-btn-round" style="width: 28px; height: 28px; border-radius: 6px;" title="Zoom Out">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                </button>
+                                <button id="btn-zoom-in" class="icon-btn-round" style="width: 28px; height: 28px; border-radius: 6px;" title="Zoom In">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
