@@ -240,22 +240,46 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
+    function hslToHex(h, s, l) {
+        l /= 100;
+        const a = s * Math.min(l, 1 - l) / 100;
+        const f = n => {
+            const k = (n + h / 30) % 12;
+            const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+            return Math.round(255 * color).toString(16).padStart(2, '0');
+        };
+        return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
+    }
+
+    function getRandomSaturatedColor() {
+        // Hue range between 65 (greenish yellow/light green) and 335 (magenta/purple)
+        // This avoids Red (335 - 360, 0 - 15) and Yellow/Orange (15 - 65)
+        const h = Math.floor(Math.random() * (335 - 65 + 1)) + 65;
+        // Saturation around 75% to 90% (highly saturated)
+        const s = Math.floor(Math.random() * (90 - 75 + 1)) + 75;
+        // Lightness around 45% to 55% (vibrant, not too dark, not too light)
+        const l = Math.floor(Math.random() * (55 - 45 + 1)) + 45;
+        return hslToHex(h, s, l);
+    }
+
     function getNextPid() {
         const existingPids = new Set(processes.map((p) => p.pid));
-        let nextPid = 1;
-        while (existingPids.has(nextPid)) {
-            nextPid += 1;
-        }
+        let nextPid;
+        do {
+            nextPid = Math.floor(Math.random() * 9000) + 1000; // 1000 to 9999
+        } while (existingPids.has(nextPid));
         return nextPid;
     }
 
     function resetFormState() {
         editingIndex = null;
         
+        if (form) form.reset();
+        
         const pidInput = document.getElementById("pid");
         if (pidInput) pidInput.value = getNextPid();
         
-        if (form) form.reset();
+        if (colorInput) colorInput.value = getRandomSaturatedColor();
         
         if (btnCheckDeadline) {
             btnCheckDeadline.checked = false;
@@ -266,7 +290,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         
         if (priorityValDisplay) priorityValDisplay.textContent = "10";
-        if (colorInput) colorInput.value = "#4F46E5";
         
         const formTitle = document.getElementById("form-title");
         if (formTitle) formTitle.textContent = "Novo Processo";
@@ -287,6 +310,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         const burstInput = document.getElementById("burstTime");
         if (burstInput) burstInput.value = p.burstTime;
+
+        if (colorInput) {
+            colorInput.value = processColors[p.pid] || "#4F46E5";
+        }
         
         if (priorityRange) {
             priorityRange.value = p.priority;
@@ -796,4 +823,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             document.addEventListener("mouseup", stopResize);
         });
     }
+
+    resetFormState();
 });
