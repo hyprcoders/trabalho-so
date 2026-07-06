@@ -483,7 +483,7 @@ input:checked + .slider:before { transform: translateX(16px); }
     padding: 24px;
     display: grid;
     grid-template-columns: 2fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
     gap: 20px;
     overflow: hidden;
 }
@@ -495,6 +495,7 @@ input:checked + .slider:before { transform: translateX(16px); }
     display: flex;
     flex-direction: column;
     box-shadow: var(--card-shadow);
+    min-height: 0;
 }
 
 .panel h2 {
@@ -507,6 +508,27 @@ input:checked + .slider:before { transform: translateX(16px); }
     padding: 20px;
     flex: 1;
     overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+/* Custom scrollbar for panel content to make it clean and premium */
+.panel-content::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.panel-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.panel-content::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.panel-content::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
 }
 
 .gantt-panel {

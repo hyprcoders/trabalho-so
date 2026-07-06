@@ -128,9 +128,19 @@
                     <input type="number" placeholder="Tempo de troca" class="disabled-input" id="switching-time-input" disabled>
                 </div>
 
-                <div class="input-group" id="decay-group" style="display:none;">
+                <div class="input-group" id="decay-group" style="display:none; margin-bottom: 16px;">
                     <label id="decay-label">Quantum</label>
                     <input type="number" placeholder="Quantum" id="decay-input" max="0.999">
+                </div>
+
+                <div class="input-group" id="temperature-group" style="display:none; margin-bottom: 16px;">
+                    <label>Temperature</label>
+                    <input type="number" placeholder="Temperature" id="temperature-input">
+                </div>
+
+                <div class="input-group" id="seed-group" style="display:none;">
+                    <label>Seed</label>
+                    <input type="number" placeholder="Seed" id="seed-input" value="0">
                 </div>
             </div>
             <div class="sidebar-resizer" id="sidebar-resizer"></div>
@@ -157,11 +167,13 @@
                 </div>
 
                 <div class="topbar-center">
-                    <div class="player-controls">
+                    <div class="player-controls" style="display: flex; gap: 12px; align-items: center;">
                         <button id="run-simulation" class="icon-btn-round play-btn" title="Play" style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                             <svg id="play-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                             <svg id="pause-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                            <svg id="repeat-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><path d="M17 1l4 4-4 4"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23l-4-4 4-4"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                        </button>
+                        <button id="repeat-simulation" class="icon-btn-round play-btn" title="Repetir" style="width: 40px; height: 40px; border-radius: 50%; display: none; align-items: center; justify-content: center;">
+                            <svg id="repeat-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23l-4-4 4-4"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
                         </button>
                     </div>
                 </div>
@@ -173,16 +185,6 @@
                             <span>0-10</span>
                         </div>
                         <input type="range" id="speed-input" min="0" max="10" value="5">
-                    </div>
-
-                    <div class="topbar-section" id="temperature-group" style="display:none;">
-                        <label>Temperature</label>
-                        <input type="number" placeholder="Temperature" id="temperature-input">
-                    </div>
-
-                    <div class="topbar-section" id="seed-group" style="display:none;">
-                        <label>Seed</label>
-                        <input type="number" placeholder="Seed" id="seed-input" value="0">
                     </div>
                 </div>
             </header>
