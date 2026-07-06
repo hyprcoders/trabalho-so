@@ -586,4 +586,72 @@ document.addEventListener("DOMContentLoaded", async () => {
             calculateSimulation();
         }
     });
+
+    // Controle de recolhimento da Barra Lateral
+    const sidebar = document.getElementById("sidebar");
+    const btnToggleSidebar = document.getElementById("btn-toggle-sidebar");
+
+    if (sidebar && btnToggleSidebar) {
+        btnToggleSidebar.addEventListener("click", () => {
+            sidebar.classList.toggle("collapsed");
+        });
+
+        sidebar.addEventListener("transitionend", (e) => {
+            // Redesenha a timeline apenas quando a transição de largura do sidebar terminar
+            if (e.target === sidebar && e.propertyName === "width") {
+                if (timelineInstance) {
+                    timelineInstance.redraw();
+                }
+            }
+        });
+    }
+
+    // Controle de redimensionamento da Barra Lateral
+    const resizer = document.getElementById("sidebar-resizer");
+    let isResizing = false;
+
+    if (resizer && sidebar) {
+        resizer.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            isResizing = true;
+            sidebar.classList.add("resizing");
+            resizer.classList.add("active");
+            document.body.style.cursor = "col-resize";
+            document.body.style.userSelect = "none";
+
+            const doResize = (moveEvent) => {
+                if (!isResizing) return;
+                const newWidth = Math.max(240, Math.min(600, moveEvent.clientX));
+                sidebar.style.width = `${newWidth}px`;
+                
+                // Redesenha a timeline de forma suave usando requestAnimationFrame
+                requestAnimationFrame(() => {
+                    if (timelineInstance) {
+                        timelineInstance.redraw();
+                    }
+                });
+            };
+
+            const stopResize = () => {
+                if (isResizing) {
+                    isResizing = false;
+                    sidebar.classList.remove("resizing");
+                    resizer.classList.remove("active");
+                    document.body.style.cursor = "";
+                    document.body.style.userSelect = "";
+                    
+                    document.removeEventListener("mousemove", doResize);
+                    document.removeEventListener("mouseup", stopResize);
+
+                    // Redesenho final de precisão
+                    if (timelineInstance) {
+                        timelineInstance.redraw();
+                    }
+                }
+            };
+
+            document.addEventListener("mousemove", doResize);
+            document.addEventListener("mouseup", stopResize);
+        });
+    }
 });

@@ -31,17 +31,56 @@ body {
 
 /* Barra Lateral */
 .sidebar {
+    position: relative;
     width: 320px;
     background-color: var(--bg-panel);
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar.collapsed {
+    width: 80px !important;
+    overflow: hidden;
+}
+
+.sidebar.resizing {
+    transition: none !important;
+}
+
+.sidebar-resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: col-resize;
+    z-index: 50;
+    transition: background-color 0.15s ease;
+}
+
+.sidebar-resizer:hover,
+.sidebar-resizer.active {
+    background-color: var(--accent);
+    opacity: 0.6;
+}
+
+.sidebar.collapsed .sidebar-resizer {
+    pointer-events: none;
+    cursor: default;
 }
 
 .sidebar-header {
     padding: 20px;
     display: flex;
+    transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1), justify-content 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 20px 0;
 }
 
 .icon-button {
@@ -55,10 +94,37 @@ body {
     justify-content: center;
     cursor: pointer;
     color: var(--text-dark);
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.icon-button:hover {
+    background: #e2e8f0;
+    color: var(--accent);
+}
+
+.icon-button svg {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar.collapsed .icon-button svg {
+    transform: rotate(180deg);
 }
 
 .sidebar-content {
     padding: 0 20px 20px 20px;
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+    opacity: 1;
+    visibility: visible;
+}
+
+.sidebar.collapsed .sidebar-content {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    height: 0;
+    padding: 0;
+    overflow: hidden;
+    transform: translateY(-10px);
 }
 
 .sidebar-title-group h2 {

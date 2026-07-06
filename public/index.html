@@ -10,9 +10,9 @@
 <body>
     <div class="app-layout">
         <!-- Barra Lateral -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <button class="icon-button">
+                <button id="btn-toggle-sidebar" class="icon-button" title="Colapsar Menu">
                     <!-- Ícone de colapsar menu -->
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
                 </button>
@@ -88,6 +88,7 @@
 
                 <ul id="process-list" class="process-list"></ul>
             </div>
+            <div class="sidebar-resizer" id="sidebar-resizer"></div>
         </aside>
 
         <!-- Conteúdo Principal -->
