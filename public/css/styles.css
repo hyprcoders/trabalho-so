@@ -37,7 +37,7 @@ body {
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
+    overflow-y: hidden;
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -115,6 +115,8 @@ body {
     transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
     opacity: 1;
     visibility: visible;
+    flex: 1;
+    overflow-y: auto;
 }
 
 .sidebar.collapsed .sidebar-content {
@@ -125,6 +127,25 @@ body {
     padding: 0;
     overflow: hidden;
     transform: translateY(-10px);
+}
+
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--bg-panel);
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease, height 0.2s ease, padding 0.2s ease;
+    opacity: 1;
+    visibility: visible;
+}
+
+.sidebar.collapsed .sidebar-footer {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    height: 0;
+    padding: 0;
+    overflow: hidden;
+    transform: translateY(10px);
 }
 
 .sidebar-title-group h2 {

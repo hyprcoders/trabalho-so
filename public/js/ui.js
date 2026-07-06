@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // =========================================================================
     let processes = [];
     let processColors = {};
+    let editingIndex = null;
     
     // Estados do Player e Gráfico
     let timelineInstance = null;
@@ -38,6 +39,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const form = document.getElementById("process-form");
     const processList = document.getElementById("process-list");
     const clearBtn = document.getElementById("clear-processes");
+    const btnToggleForm = document.getElementById("btn-toggle-form");
+    const formContainer = document.getElementById("form-container");
+    const btnCancelForm = document.getElementById("btn-cancel-form");
     const runBtn = document.getElementById("run-simulation");
     const algorithmSelect = document.getElementById("algorithm-select");
     const ganttContainer = document.getElementById("gantt-chart");
@@ -141,6 +145,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                 inputDeadline.value = "";
             }
         }
+
+        const sidebarFooter = document.getElementById("sidebar-footer");
+        if (sidebarFooter) {
+            sidebarFooter.style.display = (showSwitching || showDecay) ? "block" : "none";
+        }
     }
 
     function updateDeadlineVisibility() {
@@ -178,8 +187,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     // =========================================================================
     // 5. GERENCIAMENTO DE PROCESSOS (CRUD)
     // =========================================================================
+    function sortProcesses() {
+        const sortSelect = document.getElementById("sort-select");
+        const method = sortSelect ? sortSelect.value : "pid";
+        if (method === "pid") {
+            processes.sort((a, b) => a.pid - b.pid);
+        } else if (method === "arrivalTime") {
+            processes.sort((a, b) => a.arrivalTime - b.arrivalTime);
+        } else if (method === "burstTime") {
+            processes.sort((a, b) => a.burstTime - b.burstTime);
+        } else if (method === "deadline") {
+            processes.sort((a, b) => {
+                const valA = a.deadline !== null && a.deadline !== undefined ? a.deadline : Infinity;
+                const valB = b.deadline !== null && b.deadline !== undefined ? b.deadline : Infinity;
+                return valA - valB;
+            });
+        }
+    }
+
     function renderProcesses() {
         if (!processList) return;
+        sortProcesses();
         processList.innerHTML = "";
         
         if (processes.length === 0) {
@@ -200,7 +228,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                         <span style="display:inline-block; width:12px; height:12px; background-color:${color}; border-radius:3px; margin-right:8px; vertical-align: middle;"></span>
                         PID: ${p.pid} | Chegada: ${p.arrivalTime} | Tempo: ${p.burstTime} | ${extra}
                     </span>
-                    <button class="delete-btn" data-index="${index}" style="background: none; border: none; color: #ef4444; cursor: pointer; font-weight: bold; font-size: 16px;">✕</button>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <button class="edit-btn" data-index="${index}" style="background: none; border: none; color: #3b82f6; cursor: pointer; display: flex; align-items: center;" title="Editar">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        <button class="delete-btn" data-index="${index}" style="background: none; border: none; color: #ef4444; cursor: pointer; font-weight: bold; font-size: 16px;" title="Excluir">✕</button>
+                    </div>
                 </div>
             `;
             processList.appendChild(li);
@@ -216,14 +249,112 @@ document.addEventListener("DOMContentLoaded", async () => {
         return nextPid;
     }
 
-    // Adicionar Processo
+    function resetFormState() {
+        editingIndex = null;
+        
+        const pidInput = document.getElementById("pid");
+        if (pidInput) pidInput.value = getNextPid();
+        
+        if (form) form.reset();
+        
+        if (btnCheckDeadline) {
+            btnCheckDeadline.checked = false;
+            inputDeadline.disabled = true;
+            inputDeadline.classList.add("disabled-input");
+            inputDeadline.value = "";
+            updateDeadlineVisibility();
+        }
+        
+        if (priorityValDisplay) priorityValDisplay.textContent = "10";
+        if (colorInput) colorInput.value = "#4F46E5";
+        
+        const formTitle = document.getElementById("form-title");
+        if (formTitle) formTitle.textContent = "Novo Processo";
+        
+        const submitText = document.getElementById("submit-text");
+        if (submitText) submitText.textContent = "Adicionar";
+    }
+
+    function startEditingProcess(index) {
+        editingIndex = index;
+        const p = processes[index];
+        
+        const pidInput = document.getElementById("pid");
+        if (pidInput) pidInput.value = p.pid;
+        
+        const arrivalInput = document.getElementById("arrivalTime");
+        if (arrivalInput) arrivalInput.value = p.arrivalTime;
+        
+        const burstInput = document.getElementById("burstTime");
+        if (burstInput) burstInput.value = p.burstTime;
+        
+        if (priorityRange) {
+            priorityRange.value = p.priority;
+            if (priorityValDisplay) priorityValDisplay.textContent = p.priority;
+        }
+        
+        if (btnCheckDeadline) {
+            if (p.deadline !== null && p.deadline !== undefined) {
+                btnCheckDeadline.checked = true;
+                inputDeadline.disabled = false;
+                inputDeadline.classList.remove("disabled-input");
+                inputDeadline.value = p.deadline;
+            } else {
+                btnCheckDeadline.checked = false;
+                inputDeadline.disabled = true;
+                inputDeadline.classList.add("disabled-input");
+                inputDeadline.value = "";
+            }
+            updateDeadlineVisibility();
+        }
+        
+        const formTitle = document.getElementById("form-title");
+        if (formTitle) formTitle.textContent = "Editar Processo";
+        
+        const submitText = document.getElementById("submit-text");
+        if (submitText) submitText.textContent = "Salvar";
+        
+        if (formContainer) {
+            formContainer.style.display = "block";
+        }
+    }
+
+    // Toggle Form visibility
+    btnToggleForm?.addEventListener("click", () => {
+        resetFormState();
+        if (formContainer) {
+            if (formContainer.style.display === "none") {
+                formContainer.style.display = "block";
+            } else {
+                formContainer.style.display = "none";
+            }
+        }
+    });
+
+    // Cancel form
+    btnCancelForm?.addEventListener("click", () => {
+        resetFormState();
+        if (formContainer) {
+            formContainer.style.display = "none";
+        }
+    });
+
+    // Sort selection change
+    const sortSelect = document.getElementById("sort-select");
+    sortSelect?.addEventListener("change", () => {
+        renderProcesses();
+        if (timelineInstance) calculateSimulation();
+    });
+
+    // Adicionar / Editar Processo
     form?.addEventListener("submit", (e) => {
         e.preventDefault();
         
         const pidInput = document.getElementById("pid");
         const pid = parseInt(pidInput.value);
         
-        if (processes.some((p) => p.pid === pid)) {
+        const isPidConflict = processes.some((p, idx) => p.pid === pid && idx !== editingIndex);
+        if (isPidConflict) {
             return alert(`PID ${pid} já existe. Escolha um PID diferente.`);
         }
 
@@ -246,36 +377,44 @@ document.addEventListener("DOMContentLoaded", async () => {
             deadline: deadlineValue
         };
         
-        processes.push(newProcess);
-        renderProcesses();
-        
-        const keepDeadlineChecked = btnCheckDeadline.checked;
-        const keepDeadlineValue = inputDeadline.value;
-
-        pidInput.value = getNextPid();
-        form.reset();
-
-        if (keepDeadlineChecked) {
-            btnCheckDeadline.checked = true;
-            inputDeadline.disabled = false;
-            inputDeadline.classList.remove("disabled-input");
-            inputDeadline.value = keepDeadlineValue;
+        if (editingIndex !== null) {
+            processes[editingIndex] = newProcess;
+        } else {
+            processes.push(newProcess);
         }
-
-        if (priorityValDisplay) priorityValDisplay.textContent = "10";
-        if (colorInput) colorInput.value = "#4F46E5"; // Reseta cor
+        
+        renderProcesses();
+        resetFormState();
+        
+        if (formContainer) {
+            formContainer.style.display = "none";
+        }
         
         // Auto-recalcula se já houver um gráfico desenhado
         if (timelineInstance) calculateSimulation();
     });
 
-    // Deletar Processo Individual
+    // Click inside Process List (Delete / Edit)
     processList?.addEventListener("click", (e) => {
-        if (e.target.classList.contains("delete-btn")) {
-            const index = parseInt(e.target.getAttribute("data-index"));
+        const deleteBtn = e.target.closest(".delete-btn");
+        const editBtn = e.target.closest(".edit-btn");
+        
+        if (deleteBtn) {
+            const index = parseInt(deleteBtn.getAttribute("data-index"));
+            if (editingIndex === index) {
+                resetFormState();
+                if (formContainer) {
+                    formContainer.style.display = "none";
+                }
+            } else if (editingIndex !== null && index < editingIndex) {
+                editingIndex--;
+            }
             processes.splice(index, 1);
             renderProcesses();
             if (timelineInstance) calculateSimulation(); // Recalcula sem o processo
+        } else if (editBtn) {
+            const index = parseInt(editBtn.getAttribute("data-index"));
+            startEditingProcess(index);
         }
     });
 
@@ -284,7 +423,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         processes = [];
         processColors = {};
         renderProcesses();
-        document.getElementById("pid").value = 1;
+        resetFormState();
+        if (formContainer) {
+            formContainer.style.display = "none";
+        }
         pauseSimulation();
         fullItemsArray = [];
         if (timelineInstance) {

@@ -29,11 +29,11 @@
                     <button id="clear-processes" class="btn-text">Limpar</button>
                 </div>
 
-                <div class="new-process-card" id="form-container">
+                <div class="new-process-card" id="form-container" style="display: none;">
                     <div class="card-header">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
-                        <h3>Novo Processo</h3>
-						<button id="btn-delete"></button>
+                        <h3 id="form-title">Novo Processo</h3>
+						<button id="btn-delete" style="display: none;"></button>
                     </div>
                     
                     <form id="process-form">    
@@ -80,13 +80,43 @@
                         </div>
 
                         <div class="form-actions">
-                            <button type="submit" class="btn-dark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Adicionar</button>
+                            <button type="submit" class="btn-dark" id="btn-submit-form"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> <span id="submit-text">Adicionar</span></button>
                             <button type="button" class="btn-text" id="btn-cancel-form"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Cancelar</button>
                         </div>
                     </form>
                 </div>
 
+                <div class="process-sort-container" style="margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                    <label for="sort-select" style="margin-bottom: 0; font-size: 13px; color: var(--text-muted); white-space: nowrap;">Ordenar por:</label>
+                    <select id="sort-select" class="custom-select" style="padding: 6px 12px; font-size: 13px; min-width: 140px;">
+                        <option value="pid">PID</option>
+                        <option value="arrivalTime">Entrada</option>
+                        <option value="burstTime">Tempo</option>
+                        <option value="deadline">Deadline</option>
+                    </select>
+                </div>
+
                 <ul id="process-list" class="process-list"></ul>
+            </div>
+            <div class="sidebar-footer" id="sidebar-footer" style="display: none;">
+                <div class="input-group" id="switching-group" style="display:none; margin-bottom: 16px;">
+                    <div class="toggle-group" style="margin-top: 0; margin-bottom: 8px;">
+                        <div>
+                            <label style="margin-bottom: 0;">Troca de Contexto</label>
+                            <p class="help-text" style="margin-top: 2px;">Tempo para alternar processos</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="switching-toggle">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <input type="number" placeholder="Tempo de troca" class="disabled-input" id="switching-time-input" disabled>
+                </div>
+
+                <div class="input-group" id="decay-group" style="display:none;">
+                    <label id="decay-label">Quantum</label>
+                    <input type="number" placeholder="Quantum" id="decay-input" max="0.999">
+                </div>
             </div>
             <div class="sidebar-resizer" id="sidebar-resizer"></div>
         </aside>
@@ -134,22 +164,6 @@
 					</div>
 					<input type="range" id="speed-input" min="0" max="10" value="5">
 				</div>
-
-                <div class="topbar-section context-section" id="switching-group" style="display:none;">
-                    <div class="label-row toggle-row">
-                        <label>Troca de Contexto</label>
-                        <label class="switch">
-                            <input type="checkbox" id="switching-toggle">
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                    <input type="number" placeholder="Switching time" class="switching-time-input" id="switching-time-input" disabled>
-                </div>
-
-                <div class="topbar-section" id="decay-group" style="display:none;">
-                    <label id="decay-label">Quantum</label>
-                    <input type="number" placeholder="Quantum" id="decay-input" max="0.999">
-                </div>
 
                 <div class="topbar-section" id="temperature-group" style="display:none;">
                     <label>Temperature</label>
