@@ -920,5 +920,129 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.addEventListener("resize", handleResize);
     handleResize();
 
+    // JSON Import/Export Logic
+    const btnImportJson = document.getElementById("btn-import-json");
+    const btnExportJson = document.getElementById("btn-export-json");
+    const importModal = document.getElementById("json-import-modal");
+    const exportModal = document.getElementById("json-export-modal");
+    const btnCloseImport = document.getElementById("btn-close-import");
+    const btnCloseExport = document.getElementById("btn-close-export");
+    const btnConfirmImport = document.getElementById("btn-confirm-import");
+    const jsonImportTextarea = document.getElementById("json-import-textarea");
+    const jsonExportTextarea = document.getElementById("json-export-textarea");
+    const jsonFileInput = document.getElementById("json-file-input");
+    const btnCopyJson = document.getElementById("btn-copy-json");
+    const btnDownloadJson = document.getElementById("btn-download-json");
+
+    btnImportJson?.addEventListener("click", () => {
+        if (importModal) importModal.style.display = "flex";
+        if (jsonImportTextarea) jsonImportTextarea.value = "";
+        if (jsonFileInput) jsonFileInput.value = "";
+    });
+
+    btnCloseImport?.addEventListener("click", () => {
+        if (importModal) importModal.style.display = "none";
+    });
+
+    jsonFileInput?.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            if (jsonImportTextarea) jsonImportTextarea.value = e.target.result;
+        };
+        reader.readAsText(file);
+    });
+
+    btnConfirmImport?.addEventListener("click", () => {
+        try {
+            const val = jsonImportTextarea?.value;
+            if (!val) throw new Error("JSON vazio");
+            const data = JSON.parse(val);
+
+            // Update parameters
+            if (data.algorithm && algorithmSelect) {
+                algorithmSelect.value = data.algorithm;
+                updateFieldVisibility();
+            }
+            if (data.quantum !== undefined && decayInput) decayInput.value = data.quantum;
+            if (data.switchingTime !== undefined && switchingTimeInput) {
+                switchingTimeInput.value = data.switchingTime;
+                if (switchingToggle) {
+                    switchingToggle.checked = data.switchingTime > 0;
+                    switchingTimeInput.disabled = !switchingToggle.checked;
+                    switchingTimeInput.classList.toggle("disabled-input", !switchingToggle.checked);
+                }
+            }
+            if (data.temperature !== undefined && temperatureInput) temperatureInput.value = data.temperature;
+            if (data.seed !== undefined && seedInput) seedInput.value = data.seed;
+
+            // Load processes
+            if (Array.isArray(data.processes)) {
+                processes = data.processes.map(p => ({
+                    pid: p.pid,
+                    arrivalTime: p.arrivalTime,
+                    burstTime: p.burstTime,
+                    priority: p.priority || 0,
+                    deadline: p.deadline !== undefined ? p.deadline : null
+                }));
+                processColors = {};
+                data.processes.forEach(p => {
+                    if (p.color) processColors[p.pid] = p.color;
+                });
+            }
+
+            renderProcesses();
+            if (timelineInstance) calculateSimulation();
+            
+            if (importModal) importModal.style.display = "none";
+        } catch (e) {
+            alert("Erro ao importar JSON: " + e.message);
+        }
+    });
+
+    btnExportJson?.addEventListener("click", () => {
+        const data = {
+            algorithm: algorithmSelect?.value || "FIFO",
+            quantum: decayInput?.value ? parseFloat(decayInput.value) : 0,
+            switchingTime: switchingTimeInput && !switchingTimeInput.disabled && switchingTimeInput.value ? parseFloat(switchingTimeInput.value) : 0,
+            temperature: temperatureInput?.value ? parseFloat(temperatureInput.value) : null,
+            seed: seedInput?.value ? parseInt(seedInput.value) : 0,
+            processes: processes.map(p => ({
+                ...p,
+                color: processColors[p.pid] || "#4F46E5"
+            }))
+        };
+
+        const jsonStr = JSON.stringify(data, null, 2);
+        if (jsonExportTextarea) jsonExportTextarea.value = jsonStr;
+        if (exportModal) exportModal.style.display = "flex";
+    });
+
+    btnCloseExport?.addEventListener("click", () => {
+        if (exportModal) exportModal.style.display = "none";
+    });
+
+    btnCopyJson?.addEventListener("click", () => {
+        if (jsonExportTextarea) {
+            jsonExportTextarea.select();
+            document.execCommand("copy");
+            const prevText = btnCopyJson.textContent;
+            btnCopyJson.textContent = "Copiado!";
+            setTimeout(() => { btnCopyJson.textContent = prevText; }, 2000);
+        }
+    });
+
+    btnDownloadJson?.addEventListener("click", () => {
+        if (!jsonExportTextarea) return;
+        const blob = new Blob([jsonExportTextarea.value], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "processos.json";
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
     resetFormState();
 });
