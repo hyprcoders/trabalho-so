@@ -67,6 +67,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const speedRange = document.getElementById("speed-input");
     const speedValDisplay = document.getElementById("speed-val");
     const colorInput = document.getElementById("process-color");
+    const arrivalInput = document.getElementById("arrivalTime");
     const btnCheckDeadline = document.getElementById("check-deadline");
     const deadlineToggleGroup = document.getElementById("deadline-toggle-group");
     const deadlineGroup = document.getElementById("deadline-group");
@@ -97,6 +98,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const showDecay = quantumAlgorithms.includes(algorithm);
         const showTemperature = algorithm === mhpetAlgorithm;
         const showSeed = algorithm === mhpetAlgorithm;
+        const isPetAlgorithm = petAlgorithms.includes(algorithm);
 
         if (priorityGroup) priorityGroup.style.display = showPriority ? "" : "none";
         if (deadlineToggleGroup) deadlineToggleGroup.style.display = showDeadline ? "" : "none";
@@ -129,6 +131,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!showPriority && priorityRange) {
             priorityRange.value = "10";
             if (priorityValDisplay) priorityValDisplay.textContent = "10";
+        }
+
+        if (arrivalInput) {
+            arrivalInput.disabled = isPetAlgorithm;
+            arrivalInput.classList.toggle("disabled-input", isPetAlgorithm);
+            if (isPetAlgorithm) {
+                arrivalInput.value = "0";
+            }
         }
 
         if (!showSwitching && switchingToggle && switchingTimeInput) {
@@ -326,6 +336,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             inputDeadline.classList.add("disabled-input");
             inputDeadline.value = "";
             updateDeadlineVisibility();
+        }
+
+        if (arrivalInput) {
+            arrivalInput.disabled = petAlgorithms.includes(algorithmSelect?.value || "");
+            arrivalInput.classList.toggle("disabled-input", petAlgorithms.includes(algorithmSelect?.value || ""));
+            if (petAlgorithms.includes(algorithmSelect?.value || "")) {
+                arrivalInput.value = "0";
+            }
         }
         
         if (priorityValDisplay) priorityValDisplay.textContent = "10";
