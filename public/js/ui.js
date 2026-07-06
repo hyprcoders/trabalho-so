@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let processes = [];
     let processColors = {};
     let editingIndex = null;
+    let alertExplicitlyClosed = false;
     
     // Estados do Player e Gráfico
     let timelineInstance = null;
@@ -216,6 +217,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!processList) return;
         sortProcesses();
         processList.innerHTML = "";
+
+        const infoAlert = document.getElementById("info-alert");
+        if (infoAlert) {
+            if (processes.length > 0 || alertExplicitlyClosed) {
+                infoAlert.style.display = "none";
+            } else {
+                infoAlert.style.display = "flex";
+            }
+        }
         
         if (processes.length === 0) {
             processList.innerHTML = "<li>Nenhum processo adicionado.</li>";
@@ -886,6 +896,29 @@ document.addEventListener("DOMContentLoaded", async () => {
             document.addEventListener("mouseup", stopResize);
         });
     }
+
+    // Close explanation alert
+    const btnCloseAlert = document.getElementById("btn-close-alert");
+    btnCloseAlert?.addEventListener("click", () => {
+        alertExplicitlyClosed = true;
+        const infoAlert = document.getElementById("info-alert");
+        if (infoAlert) infoAlert.style.display = "none";
+    });
+
+    // Auto collapse sidebar if screen size is too small (< 900px)
+    function handleResize() {
+        const sidebar = document.getElementById("sidebar");
+        if (window.innerWidth < 900) {
+            if (sidebar && !sidebar.classList.contains("collapsed")) {
+                sidebar.classList.add("collapsed");
+                if (timelineInstance) {
+                    timelineInstance.redraw();
+                }
+            }
+        }
+    }
+    window.addEventListener("resize", handleResize);
+    handleResize();
 
     resetFormState();
 });
