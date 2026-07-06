@@ -31,6 +31,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     let isPlaying = false;
     let playInterval = null;
     const SCALE = 100;
+    
+    let lastExecutedSettings = null;
+    let hasPendingChangesForPlay = false;
 
     // ... [MANTENHA TODO O RESTO DO CÓDIGO INTACTO AQUI PARA BAIXO] ...
 
@@ -44,6 +47,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const formContainer = document.getElementById("form-container");
     const btnCancelForm = document.getElementById("btn-cancel-form");
     const runBtn = document.getElementById("run-simulation");
+    const repeatBtn = document.getElementById("repeat-simulation");
     
     // Control Bar elements
     const scrubber = document.getElementById("timeline-scrubber");
@@ -166,9 +170,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
+    function onAttributeChange() {
+        hasPendingChangesForPlay = true;
+        updatePlayPauseButtonState();
+    }
+
     priorityRange?.addEventListener("input", (e) => priorityValDisplay.textContent = e.target.value);
     speedRange?.addEventListener("input", (e) => speedValDisplay.textContent = e.target.value);
-    algorithmSelect?.addEventListener("change", updateFieldVisibility);
+    
+    algorithmSelect?.addEventListener("change", () => {
+        updateFieldVisibility();
+        onAttributeChange();
+    });
 
     btnCheckDeadline?.addEventListener("change", (e) => {
         if (e.target.checked) {
@@ -180,7 +193,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             inputDeadline.value = "";
         }
         updateDeadlineVisibility();
+        onAttributeChange();
     });
+
+    inputDeadline?.addEventListener("input", onAttributeChange);
 
     switchingToggle?.addEventListener("change", (e) => {
         if (switchingTimeInput) {
@@ -188,7 +204,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             switchingTimeInput.classList.toggle("disabled-input", !e.target.checked);
             if (!e.target.checked) switchingTimeInput.value = "";
         }
+        onAttributeChange();
     });
+
+    switchingTimeInput?.addEventListener("input", onAttributeChange);
+    decayInput?.addEventListener("input", onAttributeChange);
+    temperatureInput?.addEventListener("input", onAttributeChange);
+    seedInput?.addEventListener("input", onAttributeChange);
 
     if (algorithmSelect) updateFieldVisibility();
 
@@ -391,7 +413,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const sortSelect = document.getElementById("sort-select");
     sortSelect?.addEventListener("change", () => {
         renderProcesses();
-        if (timelineInstance) calculateSimulation();
+        if (timelineInstance) {
+            const groupsArray = processes.map(p => ({ id: p.pid, content: `PID: ${p.pid}` }));
+            groupsArray.push({ id: "system-idle", content: "Ocioso" });
+            timelineInstance.setGroups(new vis.DataSet(groupsArray));
+        }
     });
 
     // Adicionar / Editar Processo
@@ -438,8 +464,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             formContainer.style.display = "none";
         }
         
-        // Auto-recalcula se já houver um gráfico desenhado
-        if (timelineInstance) calculateSimulation();
+        // Mark changes instead of auto-calculating
+        hasPendingChangesForPlay = true;
+        updatePlayPauseButtonState();
     });
 
     // Click inside Process List (Delete / Edit)
@@ -459,7 +486,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
             processes.splice(index, 1);
             renderProcesses();
-            if (timelineInstance) calculateSimulation(); // Recalcula sem o processo
+            
+            // Mark changes instead of auto-calculating
+            hasPendingChangesForPlay = true;
+            updatePlayPauseButtonState();
         } else if (editBtn) {
             const index = parseInt(editBtn.getAttribute("data-index"));
             startEditingProcess(index);
@@ -477,12 +507,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         pauseSimulation();
         fullItemsArray = [];
+        lastExecutedSettings = null;
+        hasPendingChangesForPlay = false;
         if (timelineInstance) {
             timelineInstance.setItems(new vis.DataSet([]));
             timelineInstance.setGroups(new vis.DataSet([]));
         }
         if (statistics) statistics.innerHTML = "Aguardando execução...";
         if (processMetrics) processMetrics.innerHTML = "<p>Aguardando execução...</p>";
+        updatePlayPauseButtonState();
     });
 
     function renderProcessMetrics(result, selectedAlgorithm) {
@@ -611,6 +644,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
             const result = Module.schedule(config);
+
+            // Save the last executed settings
+            lastExecutedSettings = {
+                processes: JSON.parse(JSON.stringify(processes)),
+                algorithm: selectedAlgorithm,
+                switchingEnabled: switchingToggle ? switchingToggle.checked : false,
+                switchingTime: switchingTimeInput ? switchingTimeInput.value : "",
+                decay: decayInput ? decayInput.value : "",
+                temperature: temperatureInput ? temperatureInput.value : "",
+                seed: seedInput ? seedInput.value : ""
+            };
+            hasPendingChangesForPlay = false;
 
             console.log("result=", result)
 
@@ -744,24 +789,120 @@ document.addEventListener("DOMContentLoaded", async () => {
     function updatePlayPauseButtonState() {
         const playIcon = document.getElementById("play-icon");
         const pauseIcon = document.getElementById("pause-icon");
-        const repeatIcon = document.getElementById("repeat-icon");
+
         if (isPlaying) {
             if (playIcon) playIcon.style.display = "none";
             if (pauseIcon) pauseIcon.style.display = "block";
-            if (repeatIcon) repeatIcon.style.display = "none";
-            if (runBtn) runBtn.title = "Pausar";
-        } else {
-            if (playIcon) {
-                playIcon.style.display = (currentSimTime >= maxSimTime && maxSimTime > 0) ? "none" : "block";
-            }
-            if (pauseIcon) pauseIcon.style.display = "none";
-            if (repeatIcon) {
-                repeatIcon.style.display = (currentSimTime >= maxSimTime && maxSimTime > 0) ? "block" : "none";
-            }
+            if (repeatBtn) repeatBtn.style.display = "none";
             if (runBtn) {
-                runBtn.title = (currentSimTime >= maxSimTime && maxSimTime > 0) ? "Repetir" : "Play";
+                runBtn.style.display = "flex";
+                runBtn.title = "Pausar";
+            }
+        } else {
+            if (pauseIcon) pauseIcon.style.display = "none";
+            if (playIcon) playIcon.style.display = "block";
+
+            const isAtEnd = (currentSimTime >= maxSimTime && maxSimTime > 0);
+
+            if (isAtEnd) {
+                if (repeatBtn) repeatBtn.style.display = "flex";
+                if (runBtn) {
+                    runBtn.style.display = hasPendingChangesForPlay ? "flex" : "none";
+                    runBtn.title = "Play";
+                }
+            } else {
+                if (repeatBtn) repeatBtn.style.display = "none";
+                if (runBtn) {
+                    runBtn.style.display = "flex";
+                    runBtn.title = "Play";
+                }
             }
         }
+    }
+
+    function hasChangedAttributes() {
+        if (!lastExecutedSettings) return false;
+
+        // Compare algorithm
+        if (algorithmSelect.value !== lastExecutedSettings.algorithm) return true;
+
+        // Compare switching Enabled
+        const currentSwitchingEnabled = switchingToggle ? switchingToggle.checked : false;
+        if (currentSwitchingEnabled !== lastExecutedSettings.switchingEnabled) return true;
+
+        // Compare switching Time
+        const currentSwitchingTime = switchingTimeInput ? switchingTimeInput.value : "";
+        if (currentSwitchingTime !== lastExecutedSettings.switchingTime) return true;
+
+        // Compare decay / quantum
+        const currentDecay = decayInput ? decayInput.value : "";
+        if (currentDecay !== lastExecutedSettings.decay) return true;
+
+        // Compare temperature
+        const currentTemperature = temperatureInput ? temperatureInput.value : "";
+        if (currentTemperature !== lastExecutedSettings.temperature) return true;
+
+        // Compare seed
+        const currentSeed = seedInput ? seedInput.value : "";
+        if (currentSeed !== lastExecutedSettings.seed) return true;
+
+        // Compare processes (PIDs, arrivalTime, burstTime, priority, deadline)
+        if (processes.length !== lastExecutedSettings.processes.length) return true;
+
+        for (let i = 0; i < processes.length; i++) {
+            const p1 = processes[i];
+            const p2 = lastExecutedSettings.processes[i];
+            const d1 = p1.deadline !== null && p1.deadline !== undefined ? p1.deadline : null;
+            const d2 = p2.deadline !== null && p2.deadline !== undefined ? p2.deadline : null;
+            if (p1.pid !== p2.pid ||
+                p1.arrivalTime !== p2.arrivalTime ||
+                p1.burstTime !== p2.burstTime ||
+                p1.priority !== p2.priority ||
+                d1 !== d2) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    function restoreLastExecutedSettings() {
+        if (!lastExecutedSettings) return;
+
+        // Restore algorithm
+        algorithmSelect.value = lastExecutedSettings.algorithm;
+        updateFieldVisibility();
+
+        // Restore switching
+        if (switchingToggle) {
+            switchingToggle.checked = lastExecutedSettings.switchingEnabled;
+            if (switchingTimeInput) {
+                switchingTimeInput.disabled = !switchingToggle.checked;
+                switchingTimeInput.classList.toggle("disabled-input", !switchingToggle.checked);
+                switchingTimeInput.value = lastExecutedSettings.switchingTime;
+            }
+        }
+
+        // Restore decay / quantum
+        if (decayInput) {
+            decayInput.value = lastExecutedSettings.decay;
+        }
+
+        // Restore temperature
+        if (temperatureInput) {
+            temperatureInput.value = lastExecutedSettings.temperature;
+        }
+
+        // Restore seed
+        if (seedInput) {
+            seedInput.value = lastExecutedSettings.seed;
+        }
+
+        // Restore processes
+        processes = JSON.parse(JSON.stringify(lastExecutedSettings.processes));
+        renderProcesses();
+
+        hasPendingChangesForPlay = false;
     }
 
     function playSimulation() {
@@ -797,15 +938,38 @@ document.addEventListener("DOMContentLoaded", async () => {
             pauseSimulation();
         } else {
             if (currentSimTime >= maxSimTime && maxSimTime > 0) {
-                currentSimTime = 0;
-                renderSimulationFrame();
-                playSimulation();
+                if (hasPendingChangesForPlay) {
+                    calculateSimulation();
+                } else {
+                    currentSimTime = 0;
+                    renderSimulationFrame();
+                    playSimulation();
+                }
             } else if (currentSimTime > 0 && currentSimTime < maxSimTime && fullItemsArray.length > 0) {
                 playSimulation();    
             } else {
                 calculateSimulation();
             }
         }
+    });
+
+    repeatBtn?.addEventListener('click', () => {
+        if (processes.length === 0) return alert('Adicione processos primeiro!');
+        
+        if (hasChangedAttributes()) {
+            const confirmRepeat = confirm('Você alterou as configurações da simulação. Deseja descartar as alterações atuais e repetir a execução anterior com as configurações originais?');
+            if (!confirmRepeat) {
+                return; // User cancelled
+            }
+            // Restore original settings
+            restoreLastExecutedSettings();
+        }
+        
+        // Repeat the simulation
+        pauseSimulation();
+        currentSimTime = 0;
+        renderSimulationFrame();
+        playSimulation();
     });
 
     // Scrubber drag seeking
